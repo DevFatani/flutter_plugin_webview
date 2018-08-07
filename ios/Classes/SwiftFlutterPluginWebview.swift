@@ -106,12 +106,12 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     
     func buildRect(_ call: FlutterMethodCall) -> CGRect {
         let arguments: [String: Any?] = call.arguments as! [String: Any?]
-        if let rect: [String: NSNumber?] = arguments["rect"] as? [String: NSNumber?] {
+        if let rect: [String: NSNumber] = arguments["rect"] as? [String: NSNumber] {
             return CGRect(
-                x: CGFloat((rect["left"] as! NSNumber).doubleValue),
-                y: CGFloat((rect["top"] as! NSNumber).doubleValue),
-                width: CGFloat((rect["width"] as! NSNumber).doubleValue),
-                height: CGFloat((rect["height"] as! NSNumber).doubleValue)
+                x: CGFloat(rect["left"]!.doubleValue),
+                y: CGFloat(rect["top"]!.doubleValue),
+                width: CGFloat(rect["width"]!.doubleValue),
+                height: CGFloat(rect["height"]!.doubleValue)
             )
         } else {
             return viewController.view.bounds
