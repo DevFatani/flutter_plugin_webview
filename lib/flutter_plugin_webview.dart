@@ -200,19 +200,19 @@ class WebViewPlugin {
   Future clearCache() => _channel.invokeMethod("clearCache");
 
   /// Get cookies from webview
-  Future<Map<String, String>> getCookies() async {
-    final cookiesString = await evalJavascript('document.cookie');
-    final cookies = <String, String>{};
-
-    if (cookiesString?.isNotEmpty == true) {
-      cookiesString.split(';').forEach((String cookie) {
-        final split = cookie.split('=');
-        cookies[split[0]] = split[1];
-      });
-    }
-
-    return cookies;
-  }
+//  Future<Map<String, String>> getCookies() async {
+//    final cookiesString = await evalJavascript('document.cookie');
+//    final cookies = <String, String>{};
+//
+//    if (cookiesString?.isNotEmpty == true) {
+//      cookiesString.split(';').forEach((String cookie) {
+//        final split = cookie.split('=');
+//        cookies[split[0]] = split[1];
+//      });
+//    }
+//
+//    return cookies;
+//  }
 
   /// Resize WebView
   Future resize(Rect rect) {
