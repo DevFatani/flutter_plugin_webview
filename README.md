@@ -57,7 +57,6 @@ webviewPlugin.close();
 final webviewPlugin = WebViewPlugin.getInstance();  
 
 webviewPlugin.luanch(url,
-fullScreen: false,
 rect: new Rect.fromLTWH(
 0.0, 
 0.0, 
