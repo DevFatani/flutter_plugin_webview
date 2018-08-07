@@ -36,7 +36,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         case "clearCache": clearCache(result)
         case "eval": eval(call, result)
         case "resize": resize(call, result)
-        case "stopLoading":
+        case "stopLoading": stopLoading(result)
             
         default:
             result(FlutterMethodNotImplemented)
