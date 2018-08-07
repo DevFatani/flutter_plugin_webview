@@ -35,7 +35,7 @@ so you can take control of the webview from anywhere in the app
 
 #### Listen to state change
 
-WebViewState have an event = { WebViewStateEventLoadStarted | WebViewStateEventLoadFinished | WebViewStateEventError | WebViewStateEventIdle | WebViewStateEventClosed }
+WebViewState.event = { WebViewStateEventLoadStarted | WebViewStateEventLoadFinished | WebViewStateEventError | WebViewStateEventIdle | WebViewStateEventClosed }
 
 ```dart
 final webviewPlugin = WebViewPlugin.getInstance();  
