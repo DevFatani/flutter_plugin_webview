@@ -3,8 +3,10 @@ package dev.shovel.flutter_plugin_webview
 import android.annotation.TargetApi
 import android.graphics.Bitmap
 import android.os.Build
+import android.util.Log
 import android.webkit.*
 import dev.shovel.flutter_plugin_webview.WebviewState.Companion.onStateChange
+import dev.shovel.flutter_plugin_webview.WebviewState.Companion.onStateIdle
 import io.flutter.plugin.common.MethodChannel
 import java.util.HashMap
 
@@ -15,7 +17,7 @@ class WebHandler(private val channel: MethodChannel) : WebViewClient() {
         val data = HashMap<String, Any>()
         data["url"] = "$url"
         data["event"] = "loadStarted"
-        onStateChange(channel, data, false)
+        onStateChange(channel, data)
     }
 
     override fun onPageFinished(view: WebView?, url: String?) {
@@ -24,15 +26,19 @@ class WebHandler(private val channel: MethodChannel) : WebViewClient() {
         data["url"] = "$url"
         data["event"] = "loadFinished"
         onStateChange(channel, data)
+        onStateIdle(channel)
     }
 
     @Suppress("OverridingDeprecatedMember")
     override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
+        @Suppress("DEPRECATION")
+        super.onReceivedError(view, errorCode, description, failingUrl)
         val data = HashMap<String, Any>()
         data["url"] = "$failingUrl"
         data["event"] = "error"
         data["statusCode"] = "$errorCode"
         onStateChange(channel, data)
+        onStateIdle(channel)
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -43,6 +49,7 @@ class WebHandler(private val channel: MethodChannel) : WebViewClient() {
         data["event"] = "error"
         data["statusCode"] = "${errorResponse?.statusCode ?: -1}"
         onStateChange(channel, data)
+        onStateIdle(channel)
     }
 
     override fun onReceivedHttpAuthRequest(view: WebView?, handler: HttpAuthHandler?, host: String?, realm: String?) {
@@ -66,5 +73,6 @@ class WebHandler(private val channel: MethodChannel) : WebViewClient() {
                 }
             }
         })
+        onStateIdle(channel)
     }
 }

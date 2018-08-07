@@ -100,7 +100,8 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     func initWebView(_ rect: CGRect,_ configuration: WKWebViewConfiguration){
         if webView == nil {
             webView = WKWebView(frame: rect,configuration: configuration)
-            viewController.view?.addSubview(webView as WKWebView!)
+            webView!.navigationDelegate = self
+            viewController.view?.addSubview(webView!)
         }
     }
     
@@ -151,10 +152,14 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     }
     
     private func close(_ result: @escaping FlutterResult){
-        webView?.stopLoading()
-        webView?.removeFromSuperview()
-        webView?.navigationDelegate = nil
-        webView = nil
+        if webView != nil {
+            webView?.stopLoading()
+            webView?.removeFromSuperview()
+            webView?.navigationDelegate = nil
+            webView = nil
+            
+            WebviewState.onStateChange(channel ,["event": "closed"])
+        }
         
         result(true)
     }
@@ -245,10 +250,21 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         WebviewState.onStateChange(channel ,["event": "loadFinished", "url": webView.url?.absoluteString ?? ""])
+        WebviewState.onStateIdle(channel)
     }
     
-    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        let statusCode = (error as NSError).code as NSNumber
-        WebviewState.onStateChange(channel ,["event": "error", "statusCode": statusCode.stringValue, "url": webView.url?.absoluteString ?? ""])
-    }
+//    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: NSError) {
+//        let statusCode = error.code as NSNumber
+//        WebviewState.onStateChange(channel ,["event": "error", "statusCode": statusCode.stringValue, "url": webView.url?.absoluteString ?? ""])
+//    }
+//    
+//    public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+//        if navigationResponse.response is HTTPURLResponse {
+//            var response = navigationResponse.response as? HTTPURLResponse
+//            if response?.statusCode != 200 {
+//                WebviewState.onStateChange(channel ,["event": "error", "statusCode": response!.statusCode, "url": webView.url?.absoluteString ?? ""])
+//            }
+//        }
+//        decisionHandler(WKNavigationResponsePolicyAllow)
+//    }
 }

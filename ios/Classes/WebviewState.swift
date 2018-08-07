@@ -5,11 +5,8 @@ class WebviewState {
 
     private init(){}
 
-    static func onStateChange(_ channel: FlutterMethodChannel,_ data: NSDictionary,_ isIdleAfter: Bool = true) {
+    static func onStateChange(_ channel: FlutterMethodChannel,_ data: NSDictionary) {
         channel.invokeMethod("onStateChange", arguments: data)
-        if (isIdleAfter) {
-            onStateIdle(channel)
-        }
     }
 
     static func onStateIdle(_ channel: FlutterMethodChannel) {

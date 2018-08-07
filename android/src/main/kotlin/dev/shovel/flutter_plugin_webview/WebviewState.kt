@@ -5,14 +5,11 @@ import java.util.HashMap
 
 class WebviewState {
     companion object {
-        fun onStateChange(channel: MethodChannel, data: HashMap<String, Any>, isIdleAfter: Boolean = true, callback: MethodChannel.Result? = null) {
+        fun onStateChange(channel: MethodChannel, data: HashMap<String, Any>, callback: MethodChannel.Result? = null) {
             if (callback != null) {
                 channel.invokeMethod("onStateChange", data, callback)
             } else {
                 channel.invokeMethod("onStateChange", data)
-            }
-            if (isIdleAfter) {
-                onStateIdle(channel)
             }
         }
 

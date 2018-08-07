@@ -9,12 +9,18 @@ class WebViewStateEventLoadStarted extends WebViewStateEvent with WithUrl {
   WebViewStateEventLoadStarted(String url) : super() {
     this._url = url;
   }
+
+  @override
+  String toString() => 'WebViewStateEventLoadStarted, url: $url';
 }
 
 class WebViewStateEventLoadFinished extends WebViewStateEvent with WithUrl {
   WebViewStateEventLoadFinished(String url) : super() {
     this._url = url;
   }
+
+  @override
+  String toString() => 'WebViewStateEventLoadFinished, url: $url';
 }
 
 class WebViewStateEventError extends WebViewStateEvent with WithUrl {
@@ -23,11 +29,26 @@ class WebViewStateEventError extends WebViewStateEvent with WithUrl {
   WebViewStateEventError(String url, this.statusCode) : super() {
     this._url = url;
   }
+
+  @override
+  String toString() =>
+      'WebViewStateEventError, url: $url, statusCode: $statusCode';
 }
 
-class WebViewStateEventIdle extends WebViewStateEvent {}
+class WebViewStateEventIdle extends WebViewStateEvent {
+  @override
+  String toString() => 'WebViewStateEventIdle';
+}
 
-class WebViewStateEventClosed extends WebViewStateEvent {}
+class WebViewStateEventClosed extends WebViewStateEvent {
+  @override
+  String toString() => 'WebViewStateEventClosed';
+}
+
+class WebViewStateEventAuth extends WebViewStateEvent {
+  @override
+  String toString() => 'WebViewStateEventAuth';
+}
 
 class WebViewState {
   final WebViewStateEvent event;
@@ -49,8 +70,15 @@ class WebViewState {
           extraData['url'],
           extraData['statusCode'],
         );
+      case 'closed':
+        return WebViewStateEventClosed();
+      case 'auth':
+        return WebViewStateEventAuth();
       default:
         return WebViewStateEventIdle();
     }
   }
+
+  @override
+  String toString() => 'WebViewState, event: $event';
 }

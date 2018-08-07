@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Point
 import android.os.Build
-import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +13,7 @@ import android.webkit.CookieManager
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.FrameLayout
+import dev.shovel.flutter_plugin_webview.WebviewState.Companion.onStateChange
 import dev.shovel.flutter_plugin_webview.WebviewState.Companion.onStateIdle
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -21,6 +21,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.PluginRegistry
 import io.flutter.plugin.common.PluginRegistry.Registrar
+import java.util.HashMap
 
 class FlutterPluginWebview(
         private val channel: MethodChannel,
@@ -186,15 +187,21 @@ class FlutterPluginWebview(
     }
 
     private fun close(result: Result? = null) {
-        (webView?.parent as ViewGroup?)?.removeView(webView)
-        chromeFileHandler = null
-        webHandler = null
-        webView = null
+        if (webView != null) {
+            (webView?.parent as ViewGroup?)?.removeView(webView)
+            chromeFileHandler = null
+            webHandler = null
+            webView = null
+
+            val data = HashMap<String, Any>()
+            data["event"] = "closed"
+            onStateChange(channel, data)
+        }
 
         result?.success(true)
     }
 
-    private fun stopLoading(result: Result){
+    private fun stopLoading(result: Result) {
         webView?.stopLoading()
 
         result.success(webView != null)
@@ -243,7 +250,6 @@ class FlutterPluginWebview(
 
     private fun buildLayoutParams(call: MethodCall): FrameLayout.LayoutParams {
         val rc = call.argument<Map<String, Number>>("rect")
-        Log.d("Rect", "$rc")
         return if (rc != null) {
             FrameLayout.LayoutParams(
                     dp2px(
