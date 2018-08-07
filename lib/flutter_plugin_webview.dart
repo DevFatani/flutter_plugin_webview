@@ -35,8 +35,9 @@ class WebViewPlugin {
   /// content is Map for type: {LoadStarted, LoadFinished, Idle, Error, Closed}
   Stream<WebViewState> get onStateChanged => _onStateChanged.stream;
 
-  Stream<WebViewState> get onError => _onStateChanged.stream
-      .where((state) => state.event is WebViewStateEventError);
+  Stream<WebViewStateEventError> get onErrorEvent => _onStateChanged.stream
+      .where((state) => state.event is WebViewStateEventError)
+      .map((state) => state.event as WebViewStateEventError);
 
   /// Start the WebView with [url]
   /// - [headers] specify additional HTTP headers
