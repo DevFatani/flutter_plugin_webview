@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+
+import 'package:flutter/material.dart';
+
 import 'flutter_plugin_webview.dart';
 
 export 'flutter_plugin_webview.dart';
@@ -14,6 +16,7 @@ class WebViewScaffold extends StatefulWidget {
   final bool enableZoom;
   final bool enableLocalStorage;
   final bool enableScroll;
+  final bool swipeToRefresh;
   final Map<String, String> headers;
   final bool refreshOnResume;
 
@@ -28,6 +31,7 @@ class WebViewScaffold extends StatefulWidget {
     this.enableZoom = true,
     this.enableLocalStorage = true,
     this.enableScroll = true,
+    this.swipeToRefresh = true,
     this.headers,
     this.refreshOnResume = true,
   }) : super(key: key);
@@ -87,6 +91,7 @@ class WebViewScaffoldState extends State<WebViewScaffold>
         enableZoom: widget.enableZoom,
         enableLocalStorage: widget.enableLocalStorage,
         enableScroll: widget.enableScroll,
+        enableSwipeToRefresh: widget.swipeToRefresh,
       );
     } else {
       final rect = _buildRect(context);

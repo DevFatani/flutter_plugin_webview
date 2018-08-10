@@ -4,33 +4,32 @@ import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Point
 import android.os.Build
+import android.support.annotation.RequiresApi
+import android.support.v4.widget.SwipeRefreshLayout
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
-import android.webkit.CookieManager
-import android.webkit.WebSettings
-import android.webkit.WebView
+import android.webkit.*
 import android.widget.FrameLayout
 import dev.shovel.flutter_plugin_webview.WebviewState.Companion.onStateChange
 import dev.shovel.flutter_plugin_webview.WebviewState.Companion.onStateIdle
-import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
-import io.flutter.plugin.common.PluginRegistry.Registrar
-import java.util.HashMap
+import java.util.*
 
 class FlutterPluginWebview(
         private val channel: MethodChannel,
         private val activity: Activity
-) : MethodCallHandler, PluginRegistry.ActivityResultListener {
+) : MethodChannel.MethodCallHandler, PluginRegistry.ActivityResultListener, WebHandler.Callback {
 
     companion object {
         @JvmStatic
-        fun registerWith(registrar: Registrar) {
+        fun registerWith(registrar: PluginRegistry.Registrar) {
             val channel = MethodChannel(registrar.messenger(), "flutter_plugin_webview")
             with(FlutterPluginWebview(channel, registrar.activity())) {
                 registrar.addActivityResultListener(this)
@@ -40,6 +39,7 @@ class FlutterPluginWebview(
     }
 
     private var webView: WebView? = null
+    private var swipeToRefresh: SwipeRefreshLayout? = null
 
     private var chromeFileHandler: WebChromeFileHandler? = null
     private var webHandler: WebHandler? = null
@@ -72,10 +72,10 @@ class FlutterPluginWebview(
         }
     }
 
-    private fun initWebView(layoutParams: FrameLayout.LayoutParams) {
+    private fun initWebView(layoutParams: FrameLayout.LayoutParams, enableSwipeToRefresh: Boolean) {
         if (webView == null) {
             chromeFileHandler = WebChromeFileHandler(activity)
-            webHandler = WebHandler(channel)
+            webHandler = WebHandler(this)
             webView = WebView(activity)
             webView!!.webChromeClient = chromeFileHandler
             webView!!.webViewClient = webHandler
@@ -95,8 +95,17 @@ class FlutterPluginWebview(
 
                 return@setOnKeyListener false
             }
+
             activity.addContentView(
-                    webView,
+                    if (enableSwipeToRefresh)
+                        SwipeRefreshLayout(activity)
+                                .apply {
+                                    swipeToRefresh = this
+                                    addView(webView)
+                                    setOnRefreshListener { refresh() }
+                                }
+                    else
+                        webView,
                     layoutParams
             )
         }
@@ -112,10 +121,12 @@ class FlutterPluginWebview(
         val enableLocalStorage: Boolean = call.argument("enableLocalStorage")
         val headers: Map<String, String>? = call.argument("headers")
         val enableScroll: Boolean = call.argument("enableScroll")
+        val enableSwipeToRefresh: Boolean = call.argument("enableSwipeToRefresh")
 
         if (initIfClosed) {
             initWebView(
-                    buildLayoutParams(call)
+                    buildLayoutParams(call),
+                    enableSwipeToRefresh
             )
         }
 
@@ -180,17 +191,19 @@ class FlutterPluginWebview(
         result.success(hasForward)
     }
 
-    private fun refresh(result: Result) {
+    private fun refresh(result: Result? = null) {
         webView?.reload()
 
-        result.success(true)
+        result?.success(true)
     }
 
     private fun close(result: Result? = null) {
         if (webView != null) {
+            (swipeToRefresh?.parent as ViewGroup?)?.removeView(swipeToRefresh)
             (webView?.parent as ViewGroup?)?.removeView(webView)
             chromeFileHandler = null
             webHandler = null
+            swipeToRefresh = null
             webView = null
 
             val data = HashMap<String, Any>()
@@ -203,6 +216,7 @@ class FlutterPluginWebview(
 
     private fun stopLoading(result: Result) {
         webView?.stopLoading()
+        swipeToRefresh?.isRefreshing = false
 
         result.success(webView != null)
     }
@@ -243,9 +257,14 @@ class FlutterPluginWebview(
 
     private fun resize(call: MethodCall, result: Result) {
         val params = buildLayoutParams(call)
-        webView?.layoutParams = params
 
-        result.success(webView != null)
+        if (swipeToRefresh != null) {
+            swipeToRefresh?.layoutParams = params
+        } else {
+            webView?.layoutParams = params
+        }
+
+        result.success(webView != null || swipeToRefresh != null)
     }
 
     private fun buildLayoutParams(call: MethodCall): FrameLayout.LayoutParams {
@@ -284,4 +303,39 @@ class FlutterPluginWebview(
     private fun dp2px(context: Context, dp: Float): Int =
             (dp * context.resources.displayMetrics.density).toInt()
 
+    override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+        val data = HashMap<String, Any>()
+        data["url"] = "$url"
+        data["event"] = "loadStarted"
+        onStateChange(channel, data)
+    }
+
+    override fun onPageFinished(view: WebView?, url: String?) {
+        swipeToRefresh?.isRefreshing = false
+        val data = HashMap<String, Any>()
+        data["url"] = "$url"
+        data["event"] = "loadFinished"
+        onStateChange(channel, data)
+        onStateIdle(channel)
+    }
+
+    override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
+        @Suppress("DEPRECATION")
+        val data = HashMap<String, Any>()
+        data["url"] = "$failingUrl"
+        data["event"] = "error"
+        data["statusCode"] = "$errorCode"
+        onStateChange(channel, data)
+        onStateIdle(channel)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    override fun onReceivedHttpError(view: WebView?, request: WebResourceRequest?, errorResponse: WebResourceResponse?) {
+        val data = HashMap<String, Any>()
+        data["url"] = "${request?.url}"
+        data["event"] = "error"
+        data["statusCode"] = "${errorResponse?.statusCode ?: -1}"
+        onStateChange(channel, data)
+        onStateIdle(channel)
+    }
 }

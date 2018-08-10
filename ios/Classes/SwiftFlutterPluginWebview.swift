@@ -249,22 +249,30 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     }
     
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        NSLog("Testing print")
+//        let response = (navigation as? WKNavigationResponse)?.response as? HTTPURLResponse
+//        NSLog(response?.statusCode)
+        
         WebviewState.onStateChange(channel ,["event": "loadFinished", "url": webView.url?.absoluteString ?? ""])
         WebviewState.onStateIdle(channel)
     }
     
-//    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: NSError) {
-//        let statusCode = error.code as NSNumber
-//        WebviewState.onStateChange(channel ,["event": "error", "statusCode": statusCode.stringValue, "url": webView.url?.absoluteString ?? ""])
-//    }
-//    
-//    public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-//        if navigationResponse.response is HTTPURLResponse {
-//            var response = navigationResponse.response as? HTTPURLResponse
-//            if response?.statusCode != 200 {
-//                WebviewState.onStateChange(channel ,["event": "error", "statusCode": response!.statusCode, "url": webView.url?.absoluteString ?? ""])
-//            }
-//        }
-//        decisionHandler(WKNavigationResponsePolicyAllow)
-//    }
+    //    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: NSError) {
+    //        print("checking for errors")
+    //        let statusCode = error.code as NSNumber
+    //        WebviewState.onStateChange(channel ,["event": "error", "statusCode": statusCode.stringValue, "url": webView.url?.absoluteString ?? ""])
+    //    }
+    
+    public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        NSLog("checking what to do with error")
+        //        print(navigationResponse.response)
+        //        if navigationResponse.response is HTTPURLResponse {
+        //            var response = navigationResponse.response as? HTTPURLResponse
+        //            print(response?.statusCode)
+        //            if response?.statusCode != 200 {
+        //                WebviewState.onStateChange(channel ,["event": "error", "statusCode": response!.statusCode, "url": webView.url?.absoluteString ?? ""])
+        //            }
+        //        }
+        decisionHandler(.allow)
+    }
 }

@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:ui';
-import 'webview_state.dart';
 
 import 'package:flutter/services.dart';
+
+import 'webview_state.dart';
 
 export 'webview_state.dart';
 
@@ -35,6 +36,11 @@ class WebViewPlugin {
   /// content is Map for type: {LoadStarted, LoadFinished, Idle, Error, Closed}
   Stream<WebViewState> get onStateChanged => _onStateChanged.stream;
 
+  /// Listen to closed event
+  Stream<WebViewStateEventClosed> get onCloseEvent => _onStateChanged.stream
+      .where((state) => state.event is WebViewStateEventClosed)
+      .map((state) => state.event as WebViewStateEventClosed);
+
   /// Listening only to error events
   Stream<WebViewStateEventError> get onErrorEvent => _onStateChanged.stream
       .where((state) => state.event is WebViewStateEventError)
@@ -55,6 +61,7 @@ class WebViewPlugin {
   /// - [enableLocalStorage] enable localStorage API on WebView
   ///     for iOS supports iOS <= 9.0, for iOS < 9.0 enabled by default
   /// - [enableScroll]: enable or disable enableScroll
+  /// - [enableSwipeToRefresh]: enable or disable Swipe to Refresh
   Future launch(
     String url, {
     Map<String, String> headers,
@@ -67,6 +74,7 @@ class WebViewPlugin {
     bool enableZoom,
     bool enableLocalStorage,
     bool enableScroll,
+    bool enableSwipeToRefresh,
   }) {
     final args = _createParams(
       url,
@@ -80,6 +88,7 @@ class WebViewPlugin {
       enableZoom,
       enableLocalStorage,
       enableScroll,
+      enableSwipeToRefresh,
     );
 
     return _channel.invokeMethod('launch', args);
@@ -89,17 +98,18 @@ class WebViewPlugin {
   /// - [headers] specify additional HTTP headers
   /// - [enableJavaScript] enable/disable javaScript inside WebView
   ///     iOS WebView: Not implemented yet
-  /// - [enableCache] enable/disable cache cache
   /// - [clearCache] clear WebView cache
   /// - [clearCookies] clear WebView cookies
   /// - [visible] set visibility
-  ///     only on android sets visibility to VISIBLE / INVISIBLE
   /// - [rect]: show in rect, fullscreen if null
   /// - [userAgent]: set the User-Agent of WebView
   /// - [enableZoom]: enable/disable WebView zoom
-  ///      only on Android
+  ///     only on Android
+  ///     on iOS zoom cant be enabled/disabled
   /// - [enableLocalStorage] enable localStorage API on WebView
+  ///     for iOS supports iOS <= 9.0, for iOS < 9.0 enabled by default
   /// - [enableScroll]: enable or disable enableScroll
+  /// - [enableSwipeToRefresh]: enable or disable Swipe to Refresh
   Future loadUrl(
     String url, {
     Map<String, String> headers,
@@ -112,6 +122,7 @@ class WebViewPlugin {
     bool enableZoom,
     bool enableLocalStorage,
     bool enableScroll,
+    bool enableSwipeToRefresh,
   }) {
     final args = _createParams(
       url,
@@ -125,6 +136,7 @@ class WebViewPlugin {
       enableZoom,
       enableLocalStorage,
       enableScroll,
+      enableSwipeToRefresh,
     );
 
     return _channel.invokeMethod('loadUrl', args);
@@ -142,6 +154,7 @@ class WebViewPlugin {
     bool enableZoom,
     bool enableLocalStorage,
     bool enableScroll,
+    bool enableSwipeToRefresh,
   ) {
     final args = <String, dynamic>{
       'url': url,
@@ -153,6 +166,7 @@ class WebViewPlugin {
       'enableZoom': enableZoom ?? false,
       'enableLocalStorage': enableLocalStorage ?? true,
       'enableScroll': enableScroll ?? true,
+      'enableSwipeToRefresh': enableSwipeToRefresh ?? false,
       'headers': headers,
     };
 
