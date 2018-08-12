@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -19,6 +20,7 @@ class WebViewScaffold extends StatefulWidget {
   final bool swipeToRefresh;
   final Map<String, String> headers;
   final bool refreshOnResume;
+  final bool exitAppOnClose;
 
   const WebViewScaffold({
     Key key,
@@ -34,6 +36,7 @@ class WebViewScaffold extends StatefulWidget {
     this.swipeToRefresh = true,
     this.headers,
     this.refreshOnResume = true,
+    this.exitAppOnClose = false,
   }) : super(key: key);
 
   @override
@@ -51,7 +54,9 @@ class WebViewScaffoldState extends State<WebViewScaffold>
     if (widget.refreshOnResume) {
       WidgetsBinding.instance.addObserver(this);
     }
-    webviewPlugin.close();
+    if (widget.exitAppOnClose) {
+      webviewPlugin.onCloseEvent.listen((_) => exit(0));
+    }
 
     super.initState();
   }
