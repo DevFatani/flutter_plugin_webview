@@ -53,7 +53,8 @@ class FlutterPluginWebview(
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
             "launch" -> launch(call, result)
-            "loadUrl" -> launch(call, result, false)
+            "reload" -> launch(call, result, false)
+            "openUrl" -> openUrl(call, result)
             "back" -> back(result)
             "hasBack" -> result.success(hasBack())
             "forward" -> forward(result)
@@ -169,6 +170,14 @@ class FlutterPluginWebview(
         }
     }
 
+    private fun openUrl(call: MethodCall, result: Result) {
+        val url: String = call.argument("url")
+
+        webView?.loadUrl(url)
+
+        result.success(webView != null)
+    }
+
     private fun hasBack(): Boolean = webView?.canGoBack() ?: false
 
     private fun back(result: Result? = null) {
@@ -258,11 +267,8 @@ class FlutterPluginWebview(
     private fun resize(call: MethodCall, result: Result) {
         val params = buildLayoutParams(call)
 
-        if (swipeToRefresh != null) {
-            swipeToRefresh?.layoutParams = params
-        } else {
-            webView?.layoutParams = params
-        }
+        swipeToRefresh?.layoutParams = params
+        webView?.layoutParams = params
 
         result.success(webView != null || swipeToRefresh != null)
     }

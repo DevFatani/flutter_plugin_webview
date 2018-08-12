@@ -25,7 +25,8 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) -> Void {
         switch call.method {
         case "launch": launch(call, result)
-        case "loadUrl": launch(call, result, false)
+        case "reload": launch(call, result, false)
+        case "openUrl": openUrl(call, result)
         case "back": back(result)
         case "hasBack": result(hasBack())
         case "forward": forward(result)
@@ -117,6 +118,15 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         } else {
             return viewController.view.bounds
         }
+    }
+    
+    private func openUrl(_ call: FlutterMethodCall,_ result: @escaping FlutterResult){
+        let arguments: [String: Any?] = call.arguments as! [String: Any?]
+        let url: String = arguments["url"]
+        
+        webView?.load(request: URLRequest(url:url))
+        
+        result(webView != nil)
     }
     
     private func hasBack()-> Bool {
@@ -250,8 +260,8 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         NSLog("Testing print")
-//        let response = (navigation as? WKNavigationResponse)?.response as? HTTPURLResponse
-//        NSLog(response?.statusCode)
+        //        let response = (navigation as? WKNavigationResponse)?.response as? HTTPURLResponse
+        //        NSLog(response?.statusCode)
         
         WebviewState.onStateChange(channel ,["event": "loadFinished", "url": webView.url?.absoluteString ?? ""])
         WebviewState.onStateIdle(channel)

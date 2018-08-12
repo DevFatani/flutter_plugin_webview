@@ -95,7 +95,7 @@ class WebViewPlugin {
     return _channel.invokeMethod('launch', args);
   }
 
-  /// Start the WebView with [url]
+  /// Reload the WebView with [url] and new parameters
   /// - [headers] specify additional HTTP headers
   /// - [enableJavaScript] enable/disable javaScript inside WebView
   ///     iOS WebView: Not implemented yet
@@ -112,7 +112,7 @@ class WebViewPlugin {
   /// - [enableScroll]: enable or disable enableScroll
   /// - [enableSwipeToRefresh]: enable or disable Swipe to Refresh
   ///     iOS WIP
-  Future loadUrl(
+  Future reload(
     String url, {
     Map<String, String> headers,
     bool enableJavaScript,
@@ -141,7 +141,7 @@ class WebViewPlugin {
       enableSwipeToRefresh,
     );
 
-    return _channel.invokeMethod('loadUrl', args);
+    return _channel.invokeMethod('reload', args);
   }
 
   Map<String, dynamic> _createParams(
@@ -183,6 +183,9 @@ class WebViewPlugin {
 
     return args;
   }
+
+  /// Open the url.
+  Future openUrl(String url) => _channel.invokeMethod('openUrl', {'url': url});
 
   /// Execute Javascript inside WebView
   Future<String> evalJavascript(String code) {
