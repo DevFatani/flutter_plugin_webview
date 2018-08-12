@@ -13,6 +13,7 @@ class WebViewScaffold extends StatefulWidget {
   final bool enableJavaScript;
   final bool clearCache;
   final bool clearCookies;
+  final Widget drawer;
   final String userAgent;
   final bool enableZoom;
   final bool enableLocalStorage;
@@ -29,6 +30,7 @@ class WebViewScaffold extends StatefulWidget {
     this.enableJavaScript = true,
     this.clearCache = false,
     this.clearCookies = false,
+    this.drawer,
     this.userAgent,
     this.enableZoom = true,
     this.enableLocalStorage = true,
@@ -113,6 +115,7 @@ class WebViewScaffoldState extends State<WebViewScaffold>
 
     return Scaffold(
       appBar: widget.appBar,
+      drawer: widget.drawer,
       body: const Center(
         child: const CircularProgressIndicator(),
       ),
