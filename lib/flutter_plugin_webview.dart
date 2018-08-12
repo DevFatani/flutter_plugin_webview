@@ -62,6 +62,7 @@ class WebViewPlugin {
   ///     for iOS supports iOS <= 9.0, for iOS < 9.0 enabled by default
   /// - [enableScroll]: enable or disable enableScroll
   /// - [enableSwipeToRefresh]: enable or disable Swipe to Refresh
+  ///     iOS WIP
   Future launch(
     String url, {
     Map<String, String> headers,
@@ -110,6 +111,7 @@ class WebViewPlugin {
   ///     for iOS supports iOS <= 9.0, for iOS < 9.0 enabled by default
   /// - [enableScroll]: enable or disable enableScroll
   /// - [enableSwipeToRefresh]: enable or disable Swipe to Refresh
+  ///     iOS WIP
   Future loadUrl(
     String url, {
     Map<String, String> headers,
