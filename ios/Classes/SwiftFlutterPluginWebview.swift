@@ -13,6 +13,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     
     private final var viewController: UIViewController
     private final var channel: FlutterMethodChannel
+    private var swipeRefresh: UIRefreshControl?
     private var webView: WKWebView?
     
     init(_ viewController: UIViewController,_ channel: FlutterMethodChannel){
@@ -54,6 +55,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         let enableLocalStorage: Bool = arguments["enableLocalStorage"] as! Bool
         let headers: NSDictionary? = arguments["headers"] as? NSDictionary
         let enableScroll: Bool = arguments["enableScroll"] as! Bool
+        let enableSwipeToRefresh: Bool = arguments["enableSwipeToRefresh"] as! Bool
         
         if initIfClosed || webView != nil {
             let preferences = WKPreferences()
@@ -68,7 +70,8 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
             
             initWebView(
                 buildRect(call),
-                configuration
+                configuration,
+                enableSwipeToRefresh
             )
             
             webView?.allowsBackForwardNavigationGestures = true
@@ -86,7 +89,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
                 self.clearCookies()
             }
             
-            var request = URLRequest(url: URL(string: url)!)
+            var request: URLRequest = URLRequest(url: URL(string: url)!)
             // Need to check for better method
             headers?.forEach({ (arg: (key: Any, value: Any)) in
                 let (key, value) = arg
@@ -98,15 +101,25 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         }
     }
     
-    func initWebView(_ rect: CGRect,_ configuration: WKWebViewConfiguration){
+    func initWebView(_ rect: CGRect,_ configuration: WKWebViewConfiguration,_ enableSwipeToRefresh: Bool){
         if webView == nil {
             webView = WKWebView(frame: rect,configuration: configuration)
             webView!.navigationDelegate = self
+            if(enableSwipeToRefresh){
+                webView?.scrollView.bounces = true
+                swipeRefresh = UIRefreshControl()
+                swipeRefresh?.addTarget(viewController, action: #selector(self.swipeRefreshAction(_:)), for: UIControlEvents.valueChanged)
+                webView?.scrollView.addSubview(swipeRefresh!)
+            }
             viewController.view?.addSubview(webView!)
         }
     }
     
-    func buildRect(_ call: FlutterMethodCall) -> CGRect {
+    @objc private func swipeRefreshAction(_ refreshControl: UIRefreshControl) {
+        refresh()
+    }
+    
+    private func buildRect(_ call: FlutterMethodCall) -> CGRect {
         let arguments: [String: Any?] = call.arguments as! [String: Any?]
         if let rect: [String: NSNumber] = arguments["rect"] as? [String: NSNumber] {
             return CGRect(
@@ -122,9 +135,11 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     
     private func openUrl(_ call: FlutterMethodCall,_ result: @escaping FlutterResult){
         let arguments: [String: Any?] = call.arguments as! [String: Any?]
-        let url: String = arguments["url"]
+        let url: String = arguments["url"] as! String
         
-        webView?.load(request: URLRequest(url:url))
+        let request = URLRequest(url: URL(string: url)!)
+        
+        webView?.load(request)
         
         result(webView != nil)
     }
@@ -155,7 +170,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         result(hasForward)
     }
     
-    private func refresh(_ result: @escaping FlutterResult){
+    private func refresh(_ result: @escaping FlutterResult = {(value: Any?) -> Void in}){
         webView?.reload()
         
         result(webView != nil)
@@ -166,6 +181,8 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
             webView?.stopLoading()
             webView?.removeFromSuperview()
             webView?.navigationDelegate = nil
+            swipeRefresh?.endRefreshing()
+            swipeRefresh = nil
             webView = nil
             
             WebviewState.onStateChange(channel ,["event": "closed"])
@@ -250,7 +267,9 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     }
     
     private func resize(_ call: FlutterMethodCall,_ result: @escaping FlutterResult) {
-        webView?.frame = buildRect(call)
+        let rect = buildRect(call)
+        //        swipeRefresh.frame = rect
+        webView?.frame = rect
         result(webView != nil)
     }
     
@@ -259,9 +278,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     }
     
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        NSLog("Testing print")
-        //        let response = (navigation as? WKNavigationResponse)?.response as? HTTPURLResponse
-        //        NSLog(response?.statusCode)
+        swipeRefresh?.endRefreshing()
         
         WebviewState.onStateChange(channel ,["event": "loadFinished", "url": webView.url?.absoluteString ?? ""])
         WebviewState.onStateIdle(channel)

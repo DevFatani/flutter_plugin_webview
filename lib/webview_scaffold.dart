@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'flutter_plugin_webview.dart';
 
@@ -57,7 +57,7 @@ class WebViewScaffoldState extends State<WebViewScaffold>
       WidgetsBinding.instance.addObserver(this);
     }
     if (widget.exitAppOnClose) {
-      webviewPlugin.onCloseEvent.listen((_) => exit(0));
+      webviewPlugin.onCloseEvent.listen((_) => SystemNavigator.pop());
     }
 
     super.initState();

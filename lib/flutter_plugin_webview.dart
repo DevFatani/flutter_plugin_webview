@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'webview_state.dart';
@@ -248,8 +249,8 @@ class WebViewPlugin {
   }
 
   /// Disposes all Streams and closes WebView
-  void dispose() {
-    close();
+  void dispose() async {
+    await close();
     _onStateChanged.close();
     _instance = null;
   }
