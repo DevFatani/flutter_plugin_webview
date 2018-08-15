@@ -172,8 +172,13 @@ class FlutterPluginWebview(
 
     private fun openUrl(call: MethodCall, result: Result) {
         val url: String = call.argument("url")
+        val headers: Map<String, String>? = call.argument("headers")
 
-        webView?.loadUrl(url)
+        if (headers?.isNotEmpty() == true) {
+            webView?.loadUrl(url, headers)
+        } else {
+            webView?.loadUrl(url)
+        }
 
         result.success(webView != null)
     }

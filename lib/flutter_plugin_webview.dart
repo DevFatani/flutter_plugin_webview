@@ -186,7 +186,18 @@ class WebViewPlugin {
   }
 
   /// Open the url.
-  Future openUrl(String url) => _channel.invokeMethod('openUrl', {'url': url});
+  /// - [headers] specify additional HTTP headers
+  Future openUrl(
+    String url, {
+    Map<String, String> headers,
+  }) =>
+      _channel.invokeMethod(
+        'openUrl',
+        {
+          'url': url,
+          'headers': headers,
+        },
+      );
 
   /// Execute Javascript inside WebView
   Future<String> evalJavascript(String code) {

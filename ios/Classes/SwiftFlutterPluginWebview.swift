@@ -53,7 +53,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         let clearCache: Bool = arguments["clearCache"] as! Bool
         let clearCookies: Bool = arguments["clearCookies"] as! Bool
         let enableLocalStorage: Bool = arguments["enableLocalStorage"] as! Bool
-        let headers: NSDictionary? = arguments["headers"] as? NSDictionary
+        let headers: [String: String]? = arguments["headers"] as? [String: String]
         let enableScroll: Bool = arguments["enableScroll"] as! Bool
         let enableSwipeToRefresh: Bool = arguments["enableSwipeToRefresh"] as! Bool
         
@@ -90,32 +90,29 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
             }
             
             var request: URLRequest = URLRequest(url: URL(string: url)!)
-            // Need to check for better method
-            headers?.forEach({ (arg: (key: Any, value: Any)) in
-                let (key, value) = arg
-                request.setValue(key as? String, forHTTPHeaderField: value as! String)
-            })
+            
+            request.allHTTPHeaderFields = headers
             
             webView?.load(request)
             webView?.allowsBackForwardNavigationGestures = true
         }
     }
     
-    func initWebView(_ rect: CGRect,_ configuration: WKWebViewConfiguration,_ enableSwipeToRefresh: Bool){
+    private func initWebView(_ rect: CGRect,_ configuration: WKWebViewConfiguration,_ enableSwipeToRefresh: Bool){
         if webView == nil {
             webView = WKWebView(frame: rect,configuration: configuration)
             webView!.navigationDelegate = self
             if(enableSwipeToRefresh){
                 webView?.scrollView.bounces = true
                 swipeRefresh = UIRefreshControl()
-                swipeRefresh?.addTarget(viewController, action: #selector(self.swipeRefreshAction(_:)), for: UIControlEvents.valueChanged)
+                swipeRefresh?.addTarget(self, action: #selector(swipeRefreshAction), for: .valueChanged)
                 webView?.scrollView.addSubview(swipeRefresh!)
             }
             viewController.view?.addSubview(webView!)
         }
     }
     
-    @objc private func swipeRefreshAction(_ refreshControl: UIRefreshControl) {
+    @objc private func swipeRefreshAction() {
         refresh()
     }
     
@@ -136,8 +133,11 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     private func openUrl(_ call: FlutterMethodCall,_ result: @escaping FlutterResult){
         let arguments: [String: Any?] = call.arguments as! [String: Any?]
         let url: String = arguments["url"] as! String
+        let headers: [String: String]? = arguments["headers"] as? [String: String]
         
-        let request = URLRequest(url: URL(string: url)!)
+        var request = URLRequest(url: URL(string: url)!)
+        
+        request.allHTTPHeaderFields = headers
         
         webView?.load(request)
         
