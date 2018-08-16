@@ -24,9 +24,9 @@ class WebViewPlugin {
   Future _onMethodCall(MethodCall call) {
     switch (call.method) {
       case 'onStateChange':
-        _onStateChanged.add(
-          WebViewState.fromMap(Map<String, dynamic>.from(call.arguments)),
-        );
+        WebViewState state =
+            WebViewState.fromMap(Map<String, dynamic>.from(call.arguments));
+        _onStateChanged.add(state);
         break;
     }
 
@@ -37,15 +37,21 @@ class WebViewPlugin {
   /// content is Map for type: {LoadStarted, LoadFinished, Idle, Error, Closed}
   Stream<WebViewState> get onStateChanged => _onStateChanged.stream;
 
-  /// Listen to closed event
+  /// Listen to closed events
   Stream<WebViewStateEventClosed> get onCloseEvent => _onStateChanged.stream
       .where((state) => state.event is WebViewStateEventClosed)
       .map((state) => state.event as WebViewStateEventClosed);
 
-  /// Listening only to error events
+  /// Listening to error events
   Stream<WebViewStateEventError> get onErrorEvent => _onStateChanged.stream
       .where((state) => state.event is WebViewStateEventError)
       .map((state) => state.event as WebViewStateEventError);
+
+  /// Listening to url change events
+  Stream<WebViewStateEventUrlChange> get onUrlChange => _onStateChanged.stream
+      .where((state) => state.event is WebViewStateEventUrlChange)
+      .map((state) => state.event as WebViewStateEventUrlChange)
+      .distinct((prev, next) => prev.url == next.url);
 
   /// Start the WebView with [url]
   /// - [headers] specify additional HTTP headers

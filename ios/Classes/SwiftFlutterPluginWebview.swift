@@ -113,6 +113,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     }
     
     @objc private func swipeRefreshAction() {
+        NSLog("swipeRefreshAction")
         refresh()
     }
     
@@ -284,26 +285,31 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         WebviewState.onStateIdle(channel)
     }
     
-    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error){
-        let statusCode = ((error as NSError).code as NSNumber).stringValue
-        WebviewState.onStateChange(channel ,["event": "error", "statusCode": statusCode, "url": webView.url?.absoluteString ?? ""])
-    }
-    
-    public  func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        NSLog("WebView auth")
-        WebviewState.onStateChange(channel ,["event": "error", "statusCode": "401", "url": webView.url?.absoluteString ?? ""])
-        
-        completionHandler(.cancelAuthenticationChallenge, nil)
-    }
-    
-    //    public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
-    //        if navigationResponse.response is HTTPURLResponse {
-    //            let response = navigationResponse.response as! HTTPURLResponse
-    //            NSLog("WebView Status code = " + (response.statusCode as NSNumber).stringValue)
-    //            //            if response?.statusCode != 200 {
-    //            //                WebviewState.onStateChange(channel ,["event": "error", "statusCode": response!.statusCode, "url": webView.url?.absoluteString ?? ""])
-    //            //            }
-    //        }
-    //        decisionHandler(.allow)
+    //    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error){
+    //        let statusCode = ((error as NSError).code as NSNumber).stringValue
+    //        WebviewState.onStateChange(channel ,["event": "error", "statusCode": statusCode, "url": webView.url?.absoluteString ?? ""])
     //    }
+    
+    //    public  func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+    //        NSLog("WebView auth")
+    //        NSLog("%@", challenge.proposedCredential?.certificates ?? "null")
+    //        WebviewState.onStateChange(channel ,["event": "error", "statusCode": "401", "url": webView.url?.absoluteString ?? ""])
+    //
+    //        completionHandler(.performDefaultHandling, nil)
+    //    }
+    
+    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        NSLog("WebView didFail Status code")
+    }
+    
+    public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        if navigationResponse.response is HTTPURLResponse {
+            let response = navigationResponse.response as! HTTPURLResponse
+            NSLog("WebView Status code = %d", response.statusCode)
+            if response.statusCode != 200 {
+                WebviewState.onStateChange(channel ,["event": "error", "statusCode": response.statusCode, "url": webView.url?.absoluteString ?? ""])
+            }
+        }
+        decisionHandler(.allow)
+    }
 }

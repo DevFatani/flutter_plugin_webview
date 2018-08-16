@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Point
+import android.net.Uri
 import android.os.Build
 import android.support.annotation.RequiresApi
 import android.support.v4.widget.SwipeRefreshLayout
@@ -43,6 +44,9 @@ class FlutterPluginWebview(
 
     private var chromeFileHandler: WebChromeFileHandler? = null
     private var webHandler: WebHandler? = null
+
+    private var host: String = ""
+    private var enableRedirectOutsideOfHost: Boolean = false
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?): Boolean =
             if (webView == null)
@@ -123,6 +127,9 @@ class FlutterPluginWebview(
         val headers: Map<String, String>? = call.argument("headers")
         val enableScroll: Boolean = call.argument("enableScroll")
         val enableSwipeToRefresh: Boolean = call.argument("enableSwipeToRefresh")
+        enableRedirectOutsideOfHost = call.argument("enableRedirectOutsideOfHost")
+
+        host = Uri.parse(url).host
 
         if (initIfClosed) {
             initWebView(
@@ -135,7 +142,7 @@ class FlutterPluginWebview(
             with(webView!!) {
                 with(settings) {
                     javaScriptEnabled = enableJavascript
-                    domStorageEnabled = enableLocalStorage
+                    domStorageEnabled = enableLocalStorage || enableJavascript
                     setAppCacheEnabled(false)
                     cacheMode = WebSettings.LOAD_NO_CACHE
 
@@ -156,9 +163,9 @@ class FlutterPluginWebview(
                 }
 
                 if (headers?.isNotEmpty() == true) {
-                    webView!!.loadUrl(url, headers)
+                    loadUrl(url, headers)
                 } else {
-                    webView!!.loadUrl(url)
+                    loadUrl(url)
                 }
             }
 
@@ -173,6 +180,9 @@ class FlutterPluginWebview(
     private fun openUrl(call: MethodCall, result: Result) {
         val url: String = call.argument("url")
         val headers: Map<String, String>? = call.argument("headers")
+        enableRedirectOutsideOfHost = call.argument("enableRedirectOutsideOfHost")
+
+        host = Uri.parse(url).host
 
         if (headers?.isNotEmpty() == true) {
             webView?.loadUrl(url, headers)
@@ -317,6 +327,8 @@ class FlutterPluginWebview(
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         val data = HashMap<String, Any>()
         data["url"] = "$url"
+        data["event"] = "urlChange"
+        onStateChange(channel, data)
         data["event"] = "loadStarted"
         onStateChange(channel, data)
     }
@@ -335,7 +347,7 @@ class FlutterPluginWebview(
         val data = HashMap<String, Any>()
         data["url"] = "$failingUrl"
         data["event"] = "error"
-        data["statusCode"] = "$errorCode"
+        data["statusCode"] = errorCode
         onStateChange(channel, data)
         onStateIdle(channel)
     }
@@ -345,8 +357,11 @@ class FlutterPluginWebview(
         val data = HashMap<String, Any>()
         data["url"] = "${request?.url}"
         data["event"] = "error"
-        data["statusCode"] = "${errorResponse?.statusCode ?: -1}"
+        data["statusCode"] = errorResponse?.statusCode ?: -1
         onStateChange(channel, data)
         onStateIdle(channel)
     }
+
+    override fun shouldOverrideUrlLoading(view: WebView?, url: Uri?): Boolean = enableRedirectOutsideOfHost || url?.host == host
+
 }

@@ -1,11 +1,20 @@
 abstract class WebViewStateEvent {}
 
-abstract class WithUrl {
+abstract class Url {
   String get url => _url;
   String _url;
 }
 
-class WebViewStateEventLoadStarted extends WebViewStateEvent with WithUrl {
+class WebViewStateEventUrlChange extends WebViewStateEvent with Url {
+  WebViewStateEventUrlChange(String url) : super() {
+    this._url = url;
+  }
+
+  @override
+  String toString() => 'WebViewStateEventUrlChange, url: $url';
+}
+
+class WebViewStateEventLoadStarted extends WebViewStateEvent with Url {
   WebViewStateEventLoadStarted(String url) : super() {
     this._url = url;
   }
@@ -14,7 +23,7 @@ class WebViewStateEventLoadStarted extends WebViewStateEvent with WithUrl {
   String toString() => 'WebViewStateEventLoadStarted, url: $url';
 }
 
-class WebViewStateEventLoadFinished extends WebViewStateEvent with WithUrl {
+class WebViewStateEventLoadFinished extends WebViewStateEvent with Url {
   WebViewStateEventLoadFinished(String url) : super() {
     this._url = url;
   }
@@ -23,8 +32,8 @@ class WebViewStateEventLoadFinished extends WebViewStateEvent with WithUrl {
   String toString() => 'WebViewStateEventLoadFinished, url: $url';
 }
 
-class WebViewStateEventError extends WebViewStateEvent with WithUrl {
-  final String statusCode;
+class WebViewStateEventError extends WebViewStateEvent with Url {
+  final int statusCode;
 
   WebViewStateEventError(String url, this.statusCode) : super() {
     this._url = url;
@@ -61,6 +70,8 @@ class WebViewState {
   static WebViewStateEvent _getEvent(
       String event, Map<String, dynamic> extraData) {
     switch (event) {
+      case 'urlChange':
+        return WebViewStateEventUrlChange(extraData['url']);
       case 'loadStarted':
         return WebViewStateEventLoadStarted(extraData['url']);
       case 'loadFinished':
