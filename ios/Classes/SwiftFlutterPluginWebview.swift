@@ -108,6 +108,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         if webView == nil {
             webView = WKWebView(frame: rect,configuration: configuration)
             webView!.navigationDelegate = self
+            webView!.addObserver(self, forKeyPath: #keyPath(WKWebView.url), options: .new, context: nil)
             if(enableSwipeToRefresh){
                 webView?.scrollView.bounces = true
                 swipeRefresh = UIRefreshControl()
@@ -115,6 +116,12 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
                 webView?.scrollView.addSubview(swipeRefresh!)
             }
             viewController.view?.addSubview(webView!)
+        }
+    }
+    
+    public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+        if keyPath == #keyPath(WKWebView.url) {
+            WebviewState.onStateChange(channel ,["event": "urlChange", "url": webView?.url?.absoluteString ?? ""])
         }
     }
     

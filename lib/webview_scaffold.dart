@@ -38,7 +38,7 @@ class WebViewScaffold extends StatefulWidget {
     this.headers,
     this.refreshOnResume = true,
     this.exitAppOnClose = false,
-    this.enableNavigationOutsideOfHost,
+    this.enableNavigationOutsideOfHost = false,
   }) : super(key: key);
 
   @override

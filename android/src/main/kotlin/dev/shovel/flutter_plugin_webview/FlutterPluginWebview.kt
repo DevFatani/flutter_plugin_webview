@@ -68,8 +68,8 @@ class FlutterPluginWebview(
             "clearCookies" -> clearCookies(result)
             "clearCache" -> clearCache(result)
             "eval" -> eval(call, result)
-            "hide" -> setVisibility(false, result)
-            "show" -> setVisibility(true, result)
+//            "hide" -> setVisibility(false, result)
+//            "show" -> setVisibility(true, result)
             "resize" -> resize(call, result)
             "stopLoading" -> stopLoading(result)
 
@@ -117,7 +117,7 @@ class FlutterPluginWebview(
     }
 
     private fun launch(call: MethodCall, result: Result, initIfClosed: Boolean = true) {
-        val visible: Boolean = call.argument("visible")
+//        val visible: Boolean = call.argument("visible")
         val url: String = call.argument("url")
         val userAgent: String? = call.argument("userAgent")
         val enableJavascript: Boolean = call.argument("enableJavaScript")
@@ -152,7 +152,7 @@ class FlutterPluginWebview(
                 }
 
                 isVerticalScrollBarEnabled = enableScroll
-                setVisibility(visible)
+//                setVisibility(visible)
 
                 if (clearCache) {
                     clearCache()
@@ -247,7 +247,7 @@ class FlutterPluginWebview(
 
     @TargetApi(Build.VERSION_CODES.KITKAT)
     private fun eval(call: MethodCall, result: Result) {
-        val code = call.argument<String>("code")
+        val code: String = call.argument("code")
 
         webView?.evaluateJavascript(code) { value -> result.success(value) }
     }
@@ -273,11 +273,11 @@ class FlutterPluginWebview(
         }
     }
 
-    private fun setVisibility(visible: Boolean, result: Result? = null) {
-        webView?.visibility = if (visible) View.VISIBLE else View.INVISIBLE
-
-        result?.success(true)
-    }
+//    private fun setVisibility(visible: Boolean, result: Result? = null) {
+//        webView?.visibility = if (visible) View.VISIBLE else View.INVISIBLE
+//
+//        result?.success(true)
+//    }
 
     private fun resize(call: MethodCall, result: Result) {
         val params = buildLayoutParams(call)
