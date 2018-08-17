@@ -197,10 +197,8 @@ class WebViewPlugin {
       );
 
   /// Execute Javascript inside WebView
-  Future<String> evalJavascript(String code) {
-    final res = _channel.invokeMethod('eval', {'code': code});
-    return res;
-  }
+  Future<String> evalJavascript(String code) =>
+      _channel.invokeMethod('eval', {'code': code});
 
   /// Stop loading WebView
   Future stopLoading() => _channel.invokeMethod('stopLoading');
@@ -245,16 +243,17 @@ class WebViewPlugin {
 //  }
 
   /// Resize WebView
-  Future resize(Rect rect) {
-    final args = {};
-    args['rect'] = {
-      'left': rect.left,
-      'top': rect.top,
-      'width': rect.width,
-      'height': rect.height
-    };
-    return _channel.invokeMethod('resize', args);
-  }
+  Future resize(Rect rect) => _channel.invokeMethod(
+        'resize',
+        {
+          'rect': {
+            'left': rect.left,
+            'top': rect.top,
+            'width': rect.width,
+            'height': rect.height
+          }
+        },
+      );
 
   /// Disposes all Streams and closes WebView
   void dispose() async {
