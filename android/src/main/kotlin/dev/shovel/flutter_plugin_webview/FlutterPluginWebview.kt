@@ -46,7 +46,7 @@ class FlutterPluginWebview(
     private var webHandler: WebHandler? = null
 
     private var host: String = ""
-    private var enableRedirectOutsideOfHost: Boolean = false
+    private var enableNavigationOutsideOfHost: Boolean = false
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?): Boolean =
             if (webView == null)
@@ -127,7 +127,7 @@ class FlutterPluginWebview(
         val headers: Map<String, String>? = call.argument("headers")
         val enableScroll: Boolean = call.argument("enableScroll")
         val enableSwipeToRefresh: Boolean = call.argument("enableSwipeToRefresh")
-        enableRedirectOutsideOfHost = call.argument("enableRedirectOutsideOfHost")
+        enableNavigationOutsideOfHost = call.argument("enableNavigationOutsideOfHost")
 
         host = Uri.parse(url).host
 
@@ -180,7 +180,7 @@ class FlutterPluginWebview(
     private fun openUrl(call: MethodCall, result: Result) {
         val url: String = call.argument("url")
         val headers: Map<String, String>? = call.argument("headers")
-        enableRedirectOutsideOfHost = call.argument("enableRedirectOutsideOfHost")
+        enableNavigationOutsideOfHost = call.argument("enableNavigationOutsideOfHost")
 
         host = Uri.parse(url).host
 
@@ -327,8 +327,6 @@ class FlutterPluginWebview(
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         val data = HashMap<String, Any>()
         data["url"] = "$url"
-        data["event"] = "urlChange"
-        onStateChange(channel, data)
         data["event"] = "loadStarted"
         onStateChange(channel, data)
     }
@@ -362,6 +360,12 @@ class FlutterPluginWebview(
         onStateIdle(channel)
     }
 
-    override fun shouldOverrideUrlLoading(view: WebView?, url: Uri?): Boolean = enableRedirectOutsideOfHost || url?.host == host
+    override fun shouldOverrideUrlLoading(view: WebView?, url: Uri?): Boolean {
+        val data = HashMap<String, Any>()
+        data["url"] = "$url"
+        data["event"] = "urlChange"
+        onStateChange(channel, data)
+        return enableNavigationOutsideOfHost || url?.host == host
+    }
 
 }

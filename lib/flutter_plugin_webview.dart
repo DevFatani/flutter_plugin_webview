@@ -59,30 +59,26 @@ class WebViewPlugin {
   ///     iOS WebView: Not implemented yet
   /// - [clearCache] clear WebView cache
   /// - [clearCookies] clear WebView cookies
-  /// - [visible] set visibility
   /// - [rect]: show in rect, fullscreen if null
   /// - [userAgent]: set the User-Agent of WebView
-  /// - [enableZoom]: enable/disable WebView zoom
-  ///     only on Android
-  ///     on iOS zoom cant be enabled/disabled
-  /// - [enableLocalStorage] enable localStorage API on WebView
+  /// - [enableLocalStorage] enable/disable localStorage API on WebView
   ///     for iOS supports iOS <= 9.0, for iOS < 9.0 enabled by default
-  /// - [enableScroll]: enable or disable enableScroll
-  /// - [enableSwipeToRefresh]: enable or disable Swipe to Refresh
+  /// - [enableScroll]: enable/disable enableScroll
+  /// - [enableSwipeToRefresh]: enable/disable Swipe to Refresh
   ///     iOS WIP
+  /// - [enableNavigationOutsideOfHost]: enable/disable navigation outside of url host
   Future launch(
     String url, {
     Map<String, String> headers,
-    bool enableJavaScript,
-    bool clearCache,
-    bool clearCookies,
-    bool visible,
+    bool enableJavaScript = true,
+    bool clearCache = false,
+    bool clearCookies = false,
     Rect rect,
     String userAgent,
-    bool enableZoom,
-    bool enableLocalStorage,
-    bool enableScroll,
-    bool enableSwipeToRefresh,
+    bool enableLocalStorage = true,
+    bool enableScroll = true,
+    bool enableSwipeToRefresh = false,
+    bool enableNavigationOutsideOfHost = false,
   }) {
     final args = _createParams(
       url,
@@ -90,13 +86,12 @@ class WebViewPlugin {
       enableJavaScript,
       clearCache,
       clearCookies,
-      visible,
       rect,
       userAgent,
-      enableZoom,
       enableLocalStorage,
       enableScroll,
       enableSwipeToRefresh,
+      enableNavigationOutsideOfHost,
     );
 
     return _channel.invokeMethod('launch', args);
@@ -108,30 +103,26 @@ class WebViewPlugin {
   ///     iOS WebView: Not implemented yet
   /// - [clearCache] clear WebView cache
   /// - [clearCookies] clear WebView cookies
-  /// - [visible] set visibility
   /// - [rect]: show in rect, fullscreen if null
   /// - [userAgent]: set the User-Agent of WebView
-  /// - [enableZoom]: enable/disable WebView zoom
-  ///     only on Android
-  ///     on iOS zoom cant be enabled/disabled
   /// - [enableLocalStorage] enable localStorage API on WebView
   ///     for iOS supports iOS <= 9.0, for iOS < 9.0 enabled by default
   /// - [enableScroll]: enable or disable enableScroll
   /// - [enableSwipeToRefresh]: enable or disable Swipe to Refresh
   ///     iOS WIP
+  /// - [enableNavigationOutsideOfHost]: enable or disable navigation outside of url host
   Future reload(
     String url, {
     Map<String, String> headers,
-    bool enableJavaScript,
-    bool clearCache,
-    bool clearCookies,
-    bool visible,
+    bool enableJavaScript = true,
+    bool clearCache = false,
+    bool clearCookies = false,
     Rect rect,
     String userAgent,
-    bool enableZoom,
-    bool enableLocalStorage,
-    bool enableScroll,
-    bool enableSwipeToRefresh,
+    bool enableLocalStorage = true,
+    bool enableScroll = true,
+    bool enableSwipeToRefresh = false,
+    bool enableNavigationOutsideOfHost = false,
   }) {
     final args = _createParams(
       url,
@@ -139,13 +130,12 @@ class WebViewPlugin {
       enableJavaScript,
       clearCache,
       clearCookies,
-      visible,
       rect,
       userAgent,
-      enableZoom,
       enableLocalStorage,
       enableScroll,
       enableSwipeToRefresh,
+      enableNavigationOutsideOfHost,
     );
 
     return _channel.invokeMethod('reload', args);
@@ -157,26 +147,24 @@ class WebViewPlugin {
     bool enableJavaScript,
     bool clearCache,
     bool clearCookies,
-    bool visible,
     Rect rect,
     String userAgent,
-    bool enableZoom,
     bool enableLocalStorage,
     bool enableScroll,
     bool enableSwipeToRefresh,
+    bool enableNavigationOutsideOfHost,
   ) {
     final args = <String, dynamic>{
       'url': url,
       'enableJavaScript': enableJavaScript ?? true,
       'clearCache': clearCache ?? false,
-      'visible': visible ?? true,
       'clearCookies': clearCookies ?? false,
       'userAgent': userAgent,
-      'enableZoom': enableZoom ?? false,
       'enableLocalStorage': enableLocalStorage ?? true,
       'enableScroll': enableScroll ?? true,
       'enableSwipeToRefresh': enableSwipeToRefresh ?? false,
       'headers': headers,
+      'enableNavigationOutsideOfHost': enableNavigationOutsideOfHost ?? false
     };
 
     if (rect != null) {
@@ -193,15 +181,18 @@ class WebViewPlugin {
 
   /// Open the url.
   /// - [headers] specify additional HTTP headers
+  /// - [enableNavigationOutsideOfHost]: enable or disable navigation outside of url host
   Future openUrl(
     String url, {
     Map<String, String> headers,
+    bool enableNavigationOutsideOfHost = false,
   }) =>
       _channel.invokeMethod(
         'openUrl',
         {
           'url': url,
           'headers': headers,
+          'enableNavigationOutsideOfHost': enableNavigationOutsideOfHost
         },
       );
 

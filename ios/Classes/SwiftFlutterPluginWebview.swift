@@ -16,6 +16,9 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     private var swipeRefresh: UIRefreshControl?
     private var webView: WKWebView?
     
+    private var enableNavigationOutsideOfHost: Bool = false
+    private var host: String = ""
+    
     init(_ viewController: UIViewController,_ channel: FlutterMethodChannel){
         self.viewController = viewController
         self.channel = channel
@@ -47,7 +50,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     
     func launch(_ call: FlutterMethodCall,_ result: @escaping FlutterResult,_ initIfClosed: Bool = true){
         let arguments: [String: Any?] = call.arguments as! [String: Any?]
-        let url: String = arguments["url"] as! String
+        let url: URL = URL(string: arguments["url"] as! String)
         let userAgent: String? = arguments["userAgent"] as? String
         let enableJavascript: Bool = arguments["enableJavaScript"] as! Bool
         let clearCache: Bool = arguments["clearCache"] as! Bool
@@ -56,6 +59,9 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         let headers: [String: String]? = arguments["headers"] as? [String: String]
         let enableScroll: Bool = arguments["enableScroll"] as! Bool
         let enableSwipeToRefresh: Bool = arguments["enableSwipeToRefresh"] as! Bool
+        enableNavigationOutsideOfHost = arguments["enableNavigationOutsideOfHost"]
+        
+        host = url.host ?? ""
         
         if initIfClosed || webView != nil {
             let preferences = WKPreferences()
@@ -89,7 +95,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
                 self.clearCookies()
             }
             
-            var request: URLRequest = URLRequest(url: URL(string: url)!)
+            var request: URLRequest = URLRequest(url: url)
             
             request.allHTTPHeaderFields = headers
             
@@ -298,9 +304,9 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     //        completionHandler(.performDefaultHandling, nil)
     //    }
     
-    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        NSLog("WebView didFail Status code")
-    }
+    //    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+    //        NSLog("WebView didFail Status code")
+    //    }
     
     public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         if navigationResponse.response is HTTPURLResponse {
@@ -308,6 +314,12 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
             NSLog("WebView Status code = %d", response.statusCode)
             if response.statusCode != 200 {
                 WebviewState.onStateChange(channel ,["event": "error", "statusCode": response.statusCode, "url": webView.url?.absoluteString ?? ""])
+            }
+            
+            if enableNavigationOutsideOfHost || response.url?.host == host {
+                decisionHandler(.allow)
+            } else {
+                decisionHandler(.cancel)
             }
         }
         decisionHandler(.allow)

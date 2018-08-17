@@ -15,13 +15,13 @@ class WebViewScaffold extends StatefulWidget {
   final bool clearCookies;
   final Widget drawer;
   final String userAgent;
-  final bool enableZoom;
   final bool enableLocalStorage;
   final bool enableScroll;
   final bool swipeToRefresh;
   final Map<String, String> headers;
   final bool refreshOnResume;
   final bool exitAppOnClose;
+  final bool enableNavigationOutsideOfHost;
 
   const WebViewScaffold({
     Key key,
@@ -32,13 +32,13 @@ class WebViewScaffold extends StatefulWidget {
     this.clearCookies = false,
     this.drawer,
     this.userAgent,
-    this.enableZoom = true,
     this.enableLocalStorage = true,
     this.enableScroll = true,
     this.swipeToRefresh = true,
     this.headers,
     this.refreshOnResume = true,
     this.exitAppOnClose = false,
+    this.enableNavigationOutsideOfHost,
   }) : super(key: key);
 
   @override
@@ -95,10 +95,10 @@ class WebViewScaffoldState extends State<WebViewScaffold>
         clearCookies: widget.clearCookies,
         userAgent: widget.userAgent,
         rect: _rect,
-        enableZoom: widget.enableZoom,
         enableLocalStorage: widget.enableLocalStorage,
         enableScroll: widget.enableScroll,
         enableSwipeToRefresh: widget.swipeToRefresh,
+        enableNavigationOutsideOfHost: widget.enableNavigationOutsideOfHost,
       );
     } else {
       final rect = _buildRect(context);
