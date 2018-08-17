@@ -50,7 +50,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     
     func launch(_ call: FlutterMethodCall,_ result: @escaping FlutterResult,_ initIfClosed: Bool = true){
         let arguments: [String: Any?] = call.arguments as! [String: Any?]
-        let url: URL = URL(string: arguments["url"] as! String)
+        let url: URL = URL(string: arguments["url"] as! String)!
         let userAgent: String? = arguments["userAgent"] as? String
         let enableJavascript: Bool = arguments["enableJavaScript"] as! Bool
         let clearCache: Bool = arguments["clearCache"] as! Bool
@@ -59,7 +59,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         let headers: [String: String]? = arguments["headers"] as? [String: String]
         let enableScroll: Bool = arguments["enableScroll"] as! Bool
         let enableSwipeToRefresh: Bool = arguments["enableSwipeToRefresh"] as! Bool
-        enableNavigationOutsideOfHost = arguments["enableNavigationOutsideOfHost"]
+        enableNavigationOutsideOfHost = arguments["enableNavigationOutsideOfHost"] as! Bool
         
         host = url.host ?? ""
         
@@ -109,7 +109,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
             webView = WKWebView(frame: rect,configuration: configuration)
             webView!.navigationDelegate = self
             webView!.addObserver(self, forKeyPath: #keyPath(WKWebView.url), options: .new, context: nil)
-            if(enableSwipeToRefresh){
+            if enableSwipeToRefresh {
                 webView?.scrollView.bounces = true
                 swipeRefresh = UIRefreshControl()
                 swipeRefresh?.addTarget(self, action: #selector(swipeRefreshAction), for: .valueChanged)
@@ -126,7 +126,6 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     }
     
     @objc private func swipeRefreshAction() {
-        NSLog("swipeRefreshAction")
         refresh()
     }
     
@@ -146,10 +145,11 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     
     private func openUrl(_ call: FlutterMethodCall,_ result: @escaping FlutterResult){
         let arguments: [String: Any?] = call.arguments as! [String: Any?]
-        let url: String = arguments["url"] as! String
+        let url: URL = URL(string: arguments["url"] as! String)!
         let headers: [String: String]? = arguments["headers"] as? [String: String]
+        enableNavigationOutsideOfHost = arguments["enableNavigationOutsideOfHost"] as! Bool
         
-        var request = URLRequest(url: URL(string: url)!)
+        var request = URLRequest(url: url)
         
         request.allHTTPHeaderFields = headers
         
@@ -328,7 +328,8 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
             } else {
                 decisionHandler(.cancel)
             }
+        } else {
+            decisionHandler(.allow)
         }
-        decisionHandler(.allow)
     }
 }

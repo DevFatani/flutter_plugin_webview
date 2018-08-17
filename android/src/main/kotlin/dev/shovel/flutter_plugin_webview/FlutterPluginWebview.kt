@@ -8,10 +8,7 @@ import android.graphics.Bitmap
 import android.graphics.Point
 import android.net.Uri
 import android.os.Build
-import android.support.annotation.RequiresApi
-import android.support.v4.widget.SwipeRefreshLayout
 import android.view.KeyEvent
-import android.view.View
 import android.view.ViewGroup
 import android.webkit.*
 import android.widget.FrameLayout
@@ -40,9 +37,9 @@ class FlutterPluginWebview(
     }
 
     private var webView: WebView? = null
-    private var swipeToRefresh: SwipeRefreshLayout? = null
+    private var swipeToRefresh: WebViewSwipeRefreshLayout? = null
 
-    private var chromeFileHandler: WebChromeFileHandler? = null
+    private var chromeHandler: WebChromeHandler? = null
     private var webHandler: WebHandler? = null
 
     private var host: String = ""
@@ -52,7 +49,7 @@ class FlutterPluginWebview(
             if (webView == null)
                 false
             else
-                chromeFileHandler?.onActivityResult(requestCode, resultCode, intent) ?: false
+                chromeHandler?.onActivityResult(requestCode, resultCode, intent) ?: false
 
     override fun onMethodCall(call: MethodCall, result: Result) {
         when (call.method) {
@@ -79,34 +76,38 @@ class FlutterPluginWebview(
 
     private fun initWebView(layoutParams: FrameLayout.LayoutParams, enableSwipeToRefresh: Boolean) {
         if (webView == null) {
-            chromeFileHandler = WebChromeFileHandler(activity)
+            chromeHandler = WebChromeHandler(activity)
             webHandler = WebHandler(this)
             webView = WebView(activity)
-            webView!!.webChromeClient = chromeFileHandler
-            webView!!.webViewClient = webHandler
-            webView!!.setOnKeyListener { _, keyCode, event ->
-                if (event.action == KeyEvent.ACTION_DOWN) {
-                    when (keyCode) {
-                        KeyEvent.KEYCODE_BACK -> {
-                            if (hasBack()) {
-                                back()
-                            } else {
-                                close()
+                    .apply {
+                        webChromeClient = chromeHandler
+                        webViewClient = webHandler
+                        setOnKeyListener { _, keyCode, event ->
+                            if (event.action == KeyEvent.ACTION_DOWN) {
+                                when (keyCode) {
+                                    KeyEvent.KEYCODE_BACK -> {
+                                        if (hasBack()) {
+                                            back()
+                                        } else {
+                                            close()
+                                        }
+                                        return@setOnKeyListener true
+                                    }
+                                }
                             }
-                            return@setOnKeyListener true
+
+                            return@setOnKeyListener false
                         }
                     }
-                }
-
-                return@setOnKeyListener false
-            }
 
             activity.addContentView(
                     if (enableSwipeToRefresh)
-                        SwipeRefreshLayout(activity)
+                        WebViewSwipeRefreshLayout(activity)
                                 .apply {
                                     swipeToRefresh = this
+                                    webView?.layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT)
                                     addView(webView)
+                                    isNestedScrollingEnabled = true
                                     setOnRefreshListener { refresh() }
                                 }
                     else
@@ -118,7 +119,7 @@ class FlutterPluginWebview(
 
     private fun launch(call: MethodCall, result: Result, initIfClosed: Boolean = true) {
 //        val visible: Boolean = call.argument("visible")
-        val url: String = call.argument("url")
+        val url: Uri = Uri.parse(call.argument("url"))
         val userAgent: String? = call.argument("userAgent")
         val enableJavascript: Boolean = call.argument("enableJavaScript")
         val clearCache: Boolean = call.argument("clearCache")
@@ -129,7 +130,7 @@ class FlutterPluginWebview(
         val enableSwipeToRefresh: Boolean = call.argument("enableSwipeToRefresh")
         enableNavigationOutsideOfHost = call.argument("enableNavigationOutsideOfHost")
 
-        host = Uri.parse(url).host
+        host = url.host
 
         if (initIfClosed) {
             initWebView(
@@ -138,56 +139,50 @@ class FlutterPluginWebview(
             )
         }
 
-        if (webView != null) {
-            with(webView!!) {
-                with(settings) {
-                    javaScriptEnabled = enableJavascript
-                    domStorageEnabled = enableLocalStorage || enableJavascript
-                    setAppCacheEnabled(false)
-                    cacheMode = WebSettings.LOAD_NO_CACHE
+        webView?.run {
+            with(settings) {
+                javaScriptEnabled = enableJavascript
+                domStorageEnabled = enableLocalStorage || enableJavascript
+                cacheMode = WebSettings.LOAD_NO_CACHE
 
-                    if (userAgent?.isNotBlank() == true) {
-                        userAgentString = userAgent
-                    }
-                }
-
-                isVerticalScrollBarEnabled = enableScroll
-//                setVisibility(visible)
-
-                if (clearCache) {
-                    clearCache()
-                }
-
-                if (clearCookies) {
-                    clearCookies()
-                }
-
-                if (headers?.isNotEmpty() == true) {
-                    loadUrl(url, headers)
-                } else {
-                    loadUrl(url)
+                if (userAgent?.isNotBlank() == true) {
+                    userAgentString = userAgent
                 }
             }
 
-            onStateIdle(channel)
+            isVerticalScrollBarEnabled = enableScroll
 
-            result.success(true)
-        } else {
-            result.success(false)
+            if (clearCache) {
+                clearCache()
+            }
+
+            if (clearCookies) {
+                clearCookies()
+            }
+
+            if (headers?.isNotEmpty() == true) {
+                loadUrl("$url", headers)
+            } else {
+                loadUrl("$url")
+            }
+
+            onStateIdle(channel)
         }
+
+        result.success(webView != null)
     }
 
     private fun openUrl(call: MethodCall, result: Result) {
-        val url: String = call.argument("url")
+        val url: Uri = Uri.parse(call.argument("url"))
         val headers: Map<String, String>? = call.argument("headers")
         enableNavigationOutsideOfHost = call.argument("enableNavigationOutsideOfHost")
 
-        host = Uri.parse(url).host
+        host = url.host
 
         if (headers?.isNotEmpty() == true) {
-            webView?.loadUrl(url, headers)
+            webView?.loadUrl("$url", headers)
         } else {
-            webView?.loadUrl(url)
+            webView?.loadUrl("$url")
         }
 
         result.success(webView != null)
@@ -225,7 +220,7 @@ class FlutterPluginWebview(
         if (webView != null) {
             (swipeToRefresh?.parent as ViewGroup?)?.removeView(swipeToRefresh)
             (webView?.parent as ViewGroup?)?.removeView(webView)
-            chromeFileHandler = null
+            chromeHandler = null
             webHandler = null
             swipeToRefresh = null
             webView = null
@@ -282,14 +277,17 @@ class FlutterPluginWebview(
     private fun resize(call: MethodCall, result: Result) {
         val params = buildLayoutParams(call)
 
-        swipeToRefresh?.layoutParams = params
-        webView?.layoutParams = params
+        if (swipeToRefresh != null) {
+            swipeToRefresh?.layoutParams = params
+        } else {
+            webView?.layoutParams = params
+        }
 
         result.success(webView != null || swipeToRefresh != null)
     }
 
     private fun buildLayoutParams(call: MethodCall): FrameLayout.LayoutParams {
-        val rc = call.argument<Map<String, Number>>("rect")
+        val rc: Map<String, Number>? = call.argument("rect")
         return if (rc != null) {
             FrameLayout.LayoutParams(
                     dp2px(
@@ -350,7 +348,7 @@ class FlutterPluginWebview(
         onStateIdle(channel)
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onReceivedHttpError(view: WebView?, request: WebResourceRequest?, errorResponse: WebResourceResponse?) {
         val data = HashMap<String, Any>()
         data["url"] = "${request?.url}"

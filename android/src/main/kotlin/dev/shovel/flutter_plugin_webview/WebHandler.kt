@@ -4,7 +4,6 @@ import android.annotation.TargetApi
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
-import android.support.annotation.RequiresApi
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -35,7 +34,7 @@ open class WebHandler(private val callback: Callback) : WebViewClient() {
         callback.onReceivedHttpError(view, request, errorResponse)
     }
 
-    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
         return callback.shouldOverrideUrlLoading(view, request?.url)
     }
@@ -44,6 +43,7 @@ open class WebHandler(private val callback: Callback) : WebViewClient() {
     override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
         return callback.shouldOverrideUrlLoading(view, Uri.parse(url))
     }
+
 
     interface Callback {
         fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?)
