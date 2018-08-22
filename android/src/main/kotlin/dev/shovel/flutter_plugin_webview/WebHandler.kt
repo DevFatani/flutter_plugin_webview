@@ -4,10 +4,7 @@ import android.annotation.TargetApi
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
-import android.webkit.WebView
-import android.webkit.WebViewClient
+import android.webkit.*
 
 open class WebHandler(private val callback: Callback) : WebViewClient() {
 
@@ -44,6 +41,9 @@ open class WebHandler(private val callback: Callback) : WebViewClient() {
         return callback.shouldOverrideUrlLoading(view, Uri.parse(url))
     }
 
+    override fun onReceivedHttpAuthRequest(view: WebView?, handler: HttpAuthHandler?, host: String?, realm: String?) {
+        callback.onReceivedHttpAuthRequest(view, handler, host, realm)
+    }
 
     interface Callback {
         fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?)
@@ -55,5 +55,7 @@ open class WebHandler(private val callback: Callback) : WebViewClient() {
         fun onReceivedHttpError(view: WebView?, request: WebResourceRequest?, errorResponse: WebResourceResponse?)
 
         fun shouldOverrideUrlLoading(view: WebView?, url: Uri?): Boolean
+
+        fun onReceivedHttpAuthRequest(view: WebView?, handler: HttpAuthHandler?, host: String?, realm: String?)
     }
 }
