@@ -300,6 +300,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         if navigationResponse.response is HTTPURLResponse {
             let response = navigationResponse.response as! HTTPURLResponse
+            NSLog("webView response status = %d", response.statusCode)
             if response.statusCode != 200 {
                 WebviewState.onStateChange(channel ,["event": "error", "statusCode": response.statusCode, "url": webView.url?.absoluteString ?? ""])
             }
@@ -313,4 +314,26 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
             decisionHandler(.allow)
         }
     }
+    
+    public func webView(_ webView: WKWebView,
+                        didFail navigation: WKNavigation!,
+                        withError error: Error) {
+        NSLog("webView didFail")
+    }
+    
+    public func webView(_ webView: WKWebView,
+                        didFailProvisionalNavigation navigation: WKNavigation!,
+                        withError error: Error){
+        NSLog("webView didFailProvisionalNavigation")
+    }
+    
+    //    public func webView(_ webView: WKWebView,
+    //                        didReceive challenge: URLAuthenticationChallenge,
+    //                        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void){
+    //        NSLog("webView didReceive")
+    //
+    //        WebviewState.onStateChange(channel ,["event": "error", "statusCode": 401, "url": webView.url?.absoluteString ?? ""])
+    //
+    //        completionHandler(.useCredential, nil)
+    //    }
 }

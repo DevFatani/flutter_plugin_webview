@@ -1,95 +1,115 @@
-abstract class WebViewStateEvent {}
+import 'dart:ui';
+
+import 'package:meta/meta.dart';
+
+abstract class WebViewEvent {}
 
 abstract class Url {
   String get url => _url;
   String _url;
 }
 
-class WebViewStateEventUrlChange extends WebViewStateEvent with Url {
-  WebViewStateEventUrlChange(String url) : super() {
+class WebViewEventUrlChange extends WebViewEvent with Url {
+  WebViewEventUrlChange(String url) : super() {
     this._url = url;
   }
 
   @override
-  String toString() => 'WebViewStateEventUrlChange, url: $url';
+  String toString() => 'WebViewEventUrlChange';
 }
 
-class WebViewStateEventLoadStarted extends WebViewStateEvent with Url {
-  WebViewStateEventLoadStarted(String url) : super() {
-    this._url = url;
-  }
+class WebViewEventLoadStarted extends WebViewEvent with Url {
+//  WebViewEventLoadStarted(String url) : super() {
+//    this._url = url;
+//  }
 
   @override
-  String toString() => 'WebViewStateEventLoadStarted, url: $url';
+  String toString() => 'WebViewEventLoadStarted';
 }
 
-class WebViewStateEventLoadFinished extends WebViewStateEvent with Url {
-  WebViewStateEventLoadFinished(String url) : super() {
-    this._url = url;
-  }
+class WebViewEventLoadFinished extends WebViewEvent with Url {
+//  WebViewEventLoadFinished(String url) : super() {
+//    this._url = url;
+//  }
 
   @override
-  String toString() => 'WebViewStateEventLoadFinished, url: $url';
+  String toString() => 'WebViewEventLoadFinished';
 }
 
-class WebViewStateEventError extends WebViewStateEvent with Url {
+class WebViewEventError extends WebViewEvent with Url {
   final int statusCode;
 
-  WebViewStateEventError(String url, this.statusCode) : super() {
+  WebViewEventError(this.statusCode) : super() {
     this._url = url;
   }
 
   @override
-  String toString() =>
-      'WebViewStateEventError, url: $url, statusCode: $statusCode';
+  String toString() => 'WebViewEventError, statusCode: $statusCode';
 }
 
-class WebViewStateEventIdle extends WebViewStateEvent {
+class WebViewEventIdle extends WebViewEvent {
   @override
-  String toString() => 'WebViewStateEventIdle';
+  String toString() => 'WebViewEventIdle';
 }
 
-class WebViewStateEventClosed extends WebViewStateEvent {
+class WebViewEventClosed extends WebViewEvent {
   @override
-  String toString() => 'WebViewStateEventClosed';
+  String toString() => 'WebViewEventClosed';
 }
 
-class WebViewStateEventAuth extends WebViewStateEvent {
+class WebViewEventAuth extends WebViewEvent {
   @override
-  String toString() => 'WebViewStateEventAuth';
+  String toString() => 'WebViewEventAuth';
 }
 
 class WebViewState {
-  final WebViewStateEvent event;
+  final WebViewEvent event;
+  final String url;
+  final Rect rect;
 
-  WebViewState(this.event);
+  WebViewState({
+    @required this.event,
+    @required this.url,
+    @required this.rect,
+  });
 
-  factory WebViewState.fromMap(Map<String, dynamic> map) =>
-      WebViewState(_getEvent(map['event'], map));
+  factory WebViewState.reduce(
+      WebViewState oldState, Map<String, dynamic> newData) {
+    WebViewEvent event = _getEvent(newData['event'] ?? '', newData);
+    String url = newData['url'];
+    Rect rect = newData['rect'] == null
+        ? null
+        : _getRect(Map<String, double>.from(newData['rect']));
 
-  static WebViewStateEvent _getEvent(
-      String event, Map<String, dynamic> extraData) {
+    return WebViewState(
+      event: event,
+      url: (url.isNotEmpty ? url : oldState.url),
+      rect: (rect ?? oldState?.rect),
+    );
+  }
+
+  static Rect _getRect(Map<String, double> rect) => (rect == null
+      ? null
+      : Rect.fromLTWH(
+          rect['left'], rect['top'], rect['width'], rect['height']));
+
+  static WebViewEvent _getEvent(String event, Map<String, dynamic> data) {
     switch (event) {
-      case 'urlChange':
-        return WebViewStateEventUrlChange(extraData['url']);
+//      case 'urlChange':
+//        return WebViewEventUrlChange(extraData['url']);
       case 'loadStarted':
-        return WebViewStateEventLoadStarted(extraData['url']);
+        return WebViewEventLoadStarted();
       case 'loadFinished':
-        return WebViewStateEventLoadFinished(extraData['url']);
+        return WebViewEventLoadFinished();
       case 'error':
-        return WebViewStateEventError(
-          extraData['url'],
-          extraData['statusCode'],
-        );
-      case 'closed':
-        return WebViewStateEventClosed();
-      case 'auth':
-        return WebViewStateEventAuth();
+        return WebViewEventError(data['statusCode']);
+//      case 'closed':
+//        return WebViewEventClosed();
       default:
-        return WebViewStateEventIdle();
+        return null;
     }
   }
 
   @override
-  String toString() => 'WebViewState, event: $event';
+  String toString() => 'WebViewState, event: $event, url: $url, rect: $rect';
 }

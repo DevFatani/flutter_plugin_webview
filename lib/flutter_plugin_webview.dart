@@ -17,41 +17,50 @@ class WebViewPlugin {
 
   final _onStateChanged = StreamController<WebViewState>.broadcast();
 
+  WebViewState _state;
+
   WebViewPlugin._() {
     _channel.setMethodCallHandler(_onMethodCall);
+    _onStateChanged.add(null);
   }
 
   Future _onMethodCall(MethodCall call) {
     switch (call.method) {
       case 'onStateChange':
-        WebViewState state =
-            WebViewState.fromMap(Map<String, dynamic>.from(call.arguments));
-        _onStateChanged.add(state);
+        _onStateChange(call);
         break;
     }
 
     return null;
   }
 
+  void _onStateChange(MethodCall call) {
+    WebViewState state =
+        WebViewState.reduce(_state, Map<String, dynamic>.from(call.arguments));
+    _onStateChanged.add(state);
+    _state = state;
+  }
+
+  WebViewState get state => _state;
+
   /// Listening the onState Event for WebView
-  /// content is Map for type: {LoadStarted, LoadFinished, Idle, Error, Closed}
+  /// content is Map for type: {LoadStarted, LoadFinished, Error}
   Stream<WebViewState> get onStateChanged => _onStateChanged.stream;
 
   /// Listen to closed events
-  Stream<WebViewStateEventClosed> get onCloseEvent => _onStateChanged.stream
-      .where((state) => state.event is WebViewStateEventClosed)
-      .map((state) => state.event as WebViewStateEventClosed);
+  Stream<Null> get onCloseEvent =>
+      onStateChanged.where((state) => state == null).map((_) => null);
 
   /// Listening to error events
-  Stream<WebViewStateEventError> get onErrorEvent => _onStateChanged.stream
-      .where((state) => state.event is WebViewStateEventError)
-      .map((state) => state.event as WebViewStateEventError);
+  Stream<WebViewEventError> get onErrorEvent => onStateChanged
+      .where((state) => state.event is WebViewEventError)
+      .map((state) => state.event as WebViewEventError);
 
   /// Listening to url change events
-  Stream<WebViewStateEventUrlChange> get onUrlChange => _onStateChanged.stream
-      .where((state) => state.event is WebViewStateEventUrlChange)
-      .map((state) => state.event as WebViewStateEventUrlChange)
-      .distinct((prev, next) => prev.url == next.url);
+//  Stream<WebViewEventUrlChange> get onUrlChange => onStateChanged
+//      .where((state) => state.event is WebViewEventUrlChange)
+//      .map((state) => state.event as WebViewEventUrlChange)
+//      .distinct((prev, next) => prev.url == next.url);
 
   /// Start the WebView with [url]
   /// - [headers] specify additional HTTP headers

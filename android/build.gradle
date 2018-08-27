@@ -2,7 +2,7 @@ group 'dev.shovel.flutter_plugin_webview'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.2.60'
+    ext.kotlin_version = '1.2.61'
     repositories {
         google()
         jcenter()
@@ -26,7 +26,7 @@ apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion '27.0.3'
+    buildToolsVersion '28.0.1'
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'

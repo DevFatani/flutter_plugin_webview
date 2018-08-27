@@ -8,6 +8,7 @@ import 'flutter_plugin_webview.dart';
 export 'flutter_plugin_webview.dart';
 
 class WebViewScaffold extends StatefulWidget {
+  final Key scaffoldKey;
   final PreferredSizeWidget appBar;
   final String url;
   final bool enableJavaScript;
@@ -25,6 +26,7 @@ class WebViewScaffold extends StatefulWidget {
 
   const WebViewScaffold({
     Key key,
+    this.scaffoldKey,
     this.appBar,
     @required this.url,
     this.enableJavaScript = true,
@@ -85,7 +87,7 @@ class WebViewScaffoldState extends State<WebViewScaffold>
   @override
   Widget build(BuildContext context) {
     if (_rect == null) {
-      _rect = _buildRect(context);
+      _rect = _buildRect(context: context);
 
       webviewPlugin.launch(
         widget.url,
@@ -101,7 +103,7 @@ class WebViewScaffoldState extends State<WebViewScaffold>
         enableNavigationOutsideOfHost: widget.enableNavigationOutsideOfHost,
       );
     } else {
-      final rect = _buildRect(context);
+      final rect = _buildRect(context: context);
 
       if (_rect != rect) {
         _rect = rect;
@@ -114,6 +116,7 @@ class WebViewScaffoldState extends State<WebViewScaffold>
     }
 
     return Scaffold(
+      key: widget.scaffoldKey,
       appBar: widget.appBar,
       drawer: widget.drawer,
       body: const Center(
@@ -122,8 +125,8 @@ class WebViewScaffoldState extends State<WebViewScaffold>
     );
   }
 
-  Rect _buildRect(BuildContext context) {
-    final mediaQuery = MediaQuery.of(context);
+  Rect _buildRect({BuildContext context}) {
+    final mediaQuery = MediaQuery.of(context ?? this.context);
     final topPadding = mediaQuery.padding.top;
     final top =
         ((widget.appBar == null) ? 0.0 : widget.appBar.preferredSize.height) +

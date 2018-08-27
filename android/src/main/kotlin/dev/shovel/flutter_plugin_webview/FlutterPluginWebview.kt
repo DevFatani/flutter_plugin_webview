@@ -295,6 +295,7 @@ class FlutterPluginWebview(
 
     private fun buildLayoutParams(call: MethodCall): FrameLayout.LayoutParams {
         val rc: Map<String, Number>? = call.argument("rect")
+
         return if (rc != null) {
             FrameLayout.LayoutParams(
                     dp2px(
@@ -323,11 +324,23 @@ class FlutterPluginWebview(
             val size = Point()
             activity.windowManager.defaultDisplay.getSize(size)
             FrameLayout.LayoutParams(size.x, size.y)
+        }.apply {
+            val data = HashMap<String, Any>()
+            data["rect"] = HashMap<String, Number>().apply {
+                this["left"] = px2dp(activity, leftMargin)
+                this["top"] = px2dp(activity, topMargin)
+                this["width"] = px2dp(activity, width)
+                this["height"] = px2dp(activity, height)
+            }
+            onStateChange(channel, data)
         }
     }
 
     private fun dp2px(context: Context, dp: Float): Int =
             (dp * context.resources.displayMetrics.density).toInt()
+
+    private fun px2dp(context: Context, px: Int): Float =
+            (px.toFloat() / context.resources.displayMetrics.density)
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         val data = HashMap<String, Any>()
@@ -342,17 +355,16 @@ class FlutterPluginWebview(
         data["url"] = "$url"
         data["event"] = "loadFinished"
         onStateChange(channel, data)
-        onStateIdle(channel)
+//        onStateIdle(channel)
     }
 
     override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
-        @Suppress("DEPRECATION")
         val data = HashMap<String, Any>()
         data["url"] = "$failingUrl"
         data["event"] = "error"
         data["statusCode"] = errorCode
         onStateChange(channel, data)
-        onStateIdle(channel)
+//        onStateIdle(channel)
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -362,7 +374,7 @@ class FlutterPluginWebview(
         data["event"] = "error"
         data["statusCode"] = errorResponse?.statusCode ?: -1
         onStateChange(channel, data)
-        onStateIdle(channel)
+//        onStateIdle(channel)
     }
 
     override fun shouldOverrideUrlLoading(view: WebView?, url: Uri?): Boolean {
