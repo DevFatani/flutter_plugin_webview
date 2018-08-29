@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:meta/meta.dart';
+import 'package:flutter/widgets.dart';
 
 abstract class WebViewEvent {}
 
