@@ -4,13 +4,10 @@ import android.annotation.TargetApi
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.content.res.TypedArray
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.net.Uri
 import android.os.Build
-import android.util.AttributeSet
-import android.util.Log
 import android.view.KeyEvent
 import android.view.ViewGroup
 import android.webkit.*
@@ -22,7 +19,6 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import java.util.*
 import android.view.LayoutInflater
-import android.view.View
 import android.widget.FrameLayout
 
 
@@ -324,16 +320,17 @@ class FlutterPluginWebview(
             val size = Point()
             activity.windowManager.defaultDisplay.getSize(size)
             FrameLayout.LayoutParams(size.x, size.y)
-        }.apply {
-            val data = HashMap<String, Any>()
-            data["rect"] = HashMap<String, Number>().apply {
-                this["left"] = px2dp(activity, leftMargin)
-                this["top"] = px2dp(activity, topMargin)
-                this["width"] = px2dp(activity, width)
-                this["height"] = px2dp(activity, height)
-            }
-            onStateChange(channel, data)
         }
+//                .apply {
+//                    val data = HashMap<String, Any>()
+//                    data["rect"] = HashMap<String, Number>().apply {
+//                        this["left"] = px2dp(activity, leftMargin)
+//                        this["top"] = px2dp(activity, topMargin)
+//                        this["width"] = px2dp(activity, width)
+//                        this["height"] = px2dp(activity, height)
+//                    }
+//                    onStateChange(channel, data)
+//                }
     }
 
     private fun dp2px(context: Context, dp: Float): Int =
@@ -355,7 +352,6 @@ class FlutterPluginWebview(
         data["url"] = "$url"
         data["event"] = "loadFinished"
         onStateChange(channel, data)
-//        onStateIdle(channel)
     }
 
     override fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?) {
@@ -364,7 +360,6 @@ class FlutterPluginWebview(
         data["event"] = "error"
         data["statusCode"] = errorCode
         onStateChange(channel, data)
-//        onStateIdle(channel)
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -374,19 +369,7 @@ class FlutterPluginWebview(
         data["event"] = "error"
         data["statusCode"] = errorResponse?.statusCode ?: -1
         onStateChange(channel, data)
-//        onStateIdle(channel)
     }
 
-    override fun shouldOverrideUrlLoading(view: WebView?, url: Uri?): Boolean {
-        val data = HashMap<String, Any>()
-        data["url"] = "$url"
-        data["event"] = "urlChange"
-        onStateChange(channel, data)
-        return enableNavigationOutsideOfHost || url?.host == host
-    }
-
-    override fun onReceivedHttpAuthRequest(view: WebView?, handler: HttpAuthHandler?, host: String?, realm: String?) {
-//        Log.d("WebView", "onReceivedHttpAuthRequest")
-//        handler?.cancel()
-    }
+    override fun shouldOverrideUrlLoading(view: WebView?, url: Uri?): Boolean = enableNavigationOutsideOfHost || url?.host == host
 }

@@ -281,7 +281,6 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     
     private func resize(_ call: FlutterMethodCall,_ result: @escaping FlutterResult) {
         let rect = buildRect(call)
-        //        swipeRefresh.frame = rect
         webView?.frame = rect
         result(webView != nil)
     }
@@ -294,7 +293,6 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         swipeRefresh?.endRefreshing()
         
         WebviewState.onStateChange(channel ,["event": "loadFinished", "url": webView.url?.absoluteString ?? ""])
-        WebviewState.onStateIdle(channel)
     }
     
     public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
@@ -315,25 +313,10 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         }
     }
     
-    public func webView(_ webView: WKWebView,
-                        didFail navigation: WKNavigation!,
-                        withError error: Error) {
-        NSLog("webView didFail")
+    public func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void){
+        
+        WebviewState.onStateChange(channel ,["event": "error", "statusCode": 401, "url": webView.url?.absoluteString ?? ""])
+        
+        completionHandler(.useCredential, nil)
     }
-    
-    public func webView(_ webView: WKWebView,
-                        didFailProvisionalNavigation navigation: WKNavigation!,
-                        withError error: Error){
-        NSLog("webView didFailProvisionalNavigation")
-    }
-    
-    //    public func webView(_ webView: WKWebView,
-    //                        didReceive challenge: URLAuthenticationChallenge,
-    //                        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void){
-    //        NSLog("webView didReceive")
-    //
-    //        WebviewState.onStateChange(channel ,["event": "error", "statusCode": 401, "url": webView.url?.absoluteString ?? ""])
-    //
-    //        completionHandler(.useCredential, nil)
-    //    }
 }

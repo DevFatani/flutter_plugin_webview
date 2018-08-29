@@ -65,26 +65,27 @@ class WebViewEventAuth extends WebViewEvent {
 class WebViewState {
   final WebViewEvent event;
   final String url;
-  final Rect rect;
+
+//  final Rect rect;
 
   WebViewState({
     @required this.event,
     @required this.url,
-    @required this.rect,
+//    @required this.rect,
   });
 
   factory WebViewState.reduce(
       WebViewState oldState, Map<String, dynamic> newData) {
     WebViewEvent event = _getEvent(newData['event'] ?? '', newData);
     String url = newData['url'];
-    Rect rect = newData['rect'] == null
-        ? null
-        : _getRect(Map<String, double>.from(newData['rect']));
+//    Rect rect = newData['rect'] == null
+//        ? null
+//        : _getRect(Map<String, double>.from(newData['rect']));
 
     return WebViewState(
       event: event,
       url: (url.isNotEmpty ? url : oldState.url),
-      rect: (rect ?? oldState?.rect),
+//      rect: (rect ?? oldState?.rect),
     );
   }
 
@@ -111,5 +112,5 @@ class WebViewState {
   }
 
   @override
-  String toString() => 'WebViewState, event: $event, url: $url, rect: $rect';
+  String toString() => 'WebViewState, event: $event, url: $url';
 }

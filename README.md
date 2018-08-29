@@ -19,14 +19,14 @@ For help getting started with Flutter, view our online [documentation](http://fl
 
 ```dart
 new MaterialApp(
-routes: {
-"/": (_) => new WebViewScaffold(
-url: "https://www.google.com",
-appBar: new AppBar(
-title: new Text("Widget webview"),
-),
-)
-},
+        routes: {
+            "/": (_) => new WebViewScaffold(
+                url: "https://www.google.com",
+                appBar: new AppBar(
+                title: new Text("Widget webview"),
+            ),
+        )
+    },
 );
 ```
 
@@ -35,7 +35,17 @@ so you can take control of the webview from anywhere in the app
 
 #### Listen to state change
 
-WebViewState.event = { WebViewEventLoadStarted | WebViewEventLoadFinished | WebViewEventError | WebViewEventIdle | WebViewEventClosed }
+##### Breaking changes version >= 0.0.12
+```dart
+WebViewState = {
+        WebViewEvent event;
+        String url;
+    }
+```
+
+on event closed state = null
+
+WebViewState.event = { WebViewEventLoadStarted | WebViewEventLoadFinished | WebViewEventError }
 
 ```dart
 final webviewPlugin = WebViewPlugin.getInstance();  
@@ -56,12 +66,14 @@ webviewPlugin.close();
 ```dart
 final webviewPlugin = WebViewPlugin.getInstance();  
 
-webviewPlugin.luanch(url,
-rect: new Rect.fromLTWH(
-0.0, 
-0.0, 
-MediaQuery.of(context).size.width, 
-300.0));
+webviewPlugin.luanch(
+        url,
+        rect: new Rect.fromLTWH(
+        0.0,
+        0.0,
+        MediaQuery.of(context).size.width,
+        300.0,
+    ));
 ```
 
 ***Don't forget to dispose webview***
@@ -71,16 +83,18 @@ MediaQuery.of(context).size.width,
 
 ```dart
 Future<Boolean> launch(String url, {
-Map<String, String> headers,
-bool enableJavaScript,
-bool clearCache,
-bool clearCookies,
-bool visible,
-Rect rect,
-String userAgent,
-bool enableZoom,
-bool enableLocalStorage,
-bool enableScroll});
+    Map<String, String> headers,
+    bool enableJavaScript,
+    bool clearCache,
+    bool clearCookies,
+    bool visible,
+    Rect rect,
+    String userAgent,
+    bool enableZoom,
+    bool enableLocalStorage,
+    bool enableScroll,
+    }
+);
 ```
 ```dart
 Future<String> evalJavascript(String code);
