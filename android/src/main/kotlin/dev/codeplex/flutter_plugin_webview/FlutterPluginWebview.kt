@@ -1,4 +1,4 @@
-package dev.shovel.flutter_plugin_webview
+package dev.codeplex.flutter_plugin_webview
 
 import android.annotation.TargetApi
 import android.app.Activity
@@ -11,8 +11,8 @@ import android.os.Build
 import android.view.KeyEvent
 import android.view.ViewGroup
 import android.webkit.*
-import dev.shovel.flutter_plugin_webview.WebviewState.Companion.onStateChange
-import dev.shovel.flutter_plugin_webview.WebviewState.Companion.onStateIdle
+import dev.codeplex.flutter_plugin_webview.WebviewState.Companion.onStateChange
+import dev.codeplex.flutter_plugin_webview.WebviewState.Companion.onStateIdle
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.Result

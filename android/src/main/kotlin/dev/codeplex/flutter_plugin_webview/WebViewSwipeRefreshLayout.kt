@@ -1,4 +1,4 @@
-package dev.shovel.flutter_plugin_webview
+package dev.codeplex.flutter_plugin_webview
 
 import android.content.Context
 import android.support.v4.widget.SwipeRefreshLayout

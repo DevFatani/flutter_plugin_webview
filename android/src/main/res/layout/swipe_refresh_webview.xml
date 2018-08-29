@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <dev.shovel.flutter_plugin_webview.WebViewSwipeRefreshLayout
+    <dev.codeplex.flutter_plugin_webview.WebViewSwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -15,6 +15,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-    </dev.shovel.flutter_plugin_webview.WebViewSwipeRefreshLayout>
+    </dev.codeplex.flutter_plugin_webview.WebViewSwipeRefreshLayout>
 
 </FrameLayout>

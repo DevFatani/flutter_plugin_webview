@@ -1,4 +1,4 @@
-group 'dev.shovel.flutter_plugin_webview'
+group 'dev.codeplex.flutter_plugin_webview'
 version '1.0-SNAPSHOT'
 
 buildscript {

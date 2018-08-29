@@ -1,4 +1,4 @@
-package dev.shovel.flutterpluginwebviewexample
+package dev.codeplex.flutterpluginwebviewexample
 
 import android.os.Bundle
 

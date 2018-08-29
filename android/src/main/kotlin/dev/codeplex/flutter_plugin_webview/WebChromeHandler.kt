@@ -1,4 +1,4 @@
-package dev.shovel.flutter_plugin_webview
+package dev.codeplex.flutter_plugin_webview
 
 import android.app.Activity
 import android.app.Activity.RESULT_OK
