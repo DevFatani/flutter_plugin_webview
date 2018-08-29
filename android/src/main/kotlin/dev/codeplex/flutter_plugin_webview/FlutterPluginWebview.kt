@@ -21,7 +21,6 @@ import java.util.*
 import android.view.LayoutInflater
 import android.widget.FrameLayout
 
-
 class FlutterPluginWebview(
         private val channel: MethodChannel,
         private val activity: Activity
