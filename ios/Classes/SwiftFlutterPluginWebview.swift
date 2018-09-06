@@ -298,7 +298,6 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
         if navigationResponse.response is HTTPURLResponse {
             let response = navigationResponse.response as! HTTPURLResponse
-            NSLog("webView response status = %d", response.statusCode)
             if response.statusCode != 200 {
                 WebviewState.onStateChange(channel ,["event": "error", "statusCode": response.statusCode, "url": webView.url?.absoluteString ?? ""])
             }
