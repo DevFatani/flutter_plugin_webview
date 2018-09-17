@@ -36,11 +36,6 @@ open class WebHandler(private val callback: Callback) : WebViewClient() {
         return callback.shouldOverrideUrlLoading(view, request?.url)
     }
 
-    @Suppress("OverridingDeprecatedMember")
-    override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-        return callback.shouldOverrideUrlLoading(view, Uri.parse(url))
-    }
-
     interface Callback {
         fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?)
 
@@ -49,7 +44,5 @@ open class WebHandler(private val callback: Callback) : WebViewClient() {
         fun onReceivedError(view: WebView?, errorCode: Int, description: String?, failingUrl: String?)
 
         fun onReceivedHttpError(view: WebView?, request: WebResourceRequest?, errorResponse: WebResourceResponse?)
-
-        fun shouldOverrideUrlLoading(view: WebView?, url: Uri?): Boolean
     }
 }

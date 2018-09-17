@@ -15,9 +15,6 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     private var swipeRefresh: UIRefreshControl?
     private var webView: WKWebView?
     
-    private var enableNavigationOutsideOfHost: Bool = false
-    private var host: String = ""
-    
     init(_ viewController: UIViewController,_ channel: FlutterMethodChannel){
         self.viewController = viewController
         self.channel = channel
@@ -58,9 +55,6 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         let headers: [String: String]? = arguments["headers"] as? [String: String]
         let enableScroll: Bool = arguments["enableScroll"] as! Bool
         let enableSwipeToRefresh: Bool = arguments["enableSwipeToRefresh"] as! Bool
-        enableNavigationOutsideOfHost = arguments["enableNavigationOutsideOfHost"] as! Bool
-        
-        host = url.host ?? ""
         
         if initIfClosed || webView != nil {
             let preferences = WKPreferences()
@@ -98,7 +92,6 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
             
             request.allHTTPHeaderFields = headers
             
-            webView?.allowsBackForwardNavigationGestures = true
             webView?.load(request)
         }
     }
@@ -107,7 +100,6 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         if webView == nil {
             webView = WKWebView(frame: rect,configuration: configuration)
             webView!.navigationDelegate = self
-            //            webView!.addObserver(self, forKeyPath: #keyPath(WKWebView.url), options: .new, context: nil)
             if enableSwipeToRefresh {
                 webView?.scrollView.bounces = true
                 swipeRefresh = UIRefreshControl()
@@ -117,12 +109,6 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
             viewController.view?.addSubview(webView!)
         }
     }
-    
-    //    public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-    //        if keyPath == #keyPath(WKWebView.url) {
-    //            WebviewState.onStateChange(channel ,["event": "urlChange", "url": webView?.url?.absoluteString ?? ""])
-    //        }
-    //    }
     
     @objc private func swipeRefreshAction() {
         refresh()
@@ -146,7 +132,6 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         let arguments: [String: Any?] = call.arguments as! [String: Any?]
         let url: URL = URL(string: arguments["url"] as! String)!
         let headers: [String: String]? = arguments["headers"] as? [String: String]
-        enableNavigationOutsideOfHost = arguments["enableNavigationOutsideOfHost"] as! Bool
         
         var request = URLRequest(url: url)
         
@@ -288,7 +273,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         WebviewState.onStateChange(channel ,["event": "loadStarted", "url": webView.url?.absoluteString ?? ""])
     }
     
-    public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+    public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {        
         swipeRefresh?.endRefreshing()
         
         WebviewState.onStateChange(channel ,["event": "loadFinished", "url": webView.url?.absoluteString ?? ""])
@@ -301,18 +286,13 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
                 WebviewState.onStateChange(channel ,["event": "error", "statusCode": response.statusCode, "url": webView.url?.absoluteString ?? ""])
             }
             
-            if enableNavigationOutsideOfHost || response.url?.host == host {
-                decisionHandler(.allow)
-            } else {
-                decisionHandler(.cancel)
-            }
+            decisionHandler(.allow)
         } else {
             decisionHandler(.allow)
         }
     }
     
     public func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void){
-        
         WebviewState.onStateChange(channel ,["event": "error", "statusCode": 401, "url": webView.url?.absoluteString ?? ""])
         
         completionHandler(.useCredential, nil)

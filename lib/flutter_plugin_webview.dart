@@ -74,8 +74,6 @@ class WebViewPlugin {
   ///     for iOS supports iOS <= 9.0, for iOS < 9.0 enabled by default
   /// - [enableScroll]: enable/disable enableScroll
   /// - [enableSwipeToRefresh]: enable/disable Swipe to Refresh
-  ///     iOS WIP
-  /// - [enableNavigationOutsideOfHost]: enable/disable navigation outside of url host
   Future launch(
     String url, {
     Map<String, String> headers,
@@ -87,7 +85,6 @@ class WebViewPlugin {
     bool enableLocalStorage = true,
     bool enableScroll = true,
     bool enableSwipeToRefresh = false,
-    bool enableNavigationOutsideOfHost = false,
   }) {
     final args = _createParams(
       url,
@@ -100,7 +97,6 @@ class WebViewPlugin {
       enableLocalStorage,
       enableScroll,
       enableSwipeToRefresh,
-      enableNavigationOutsideOfHost,
     );
 
     return _channel.invokeMethod('launch', args);
@@ -118,8 +114,6 @@ class WebViewPlugin {
   ///     for iOS supports iOS <= 9.0, for iOS < 9.0 enabled by default
   /// - [enableScroll]: enable or disable enableScroll
   /// - [enableSwipeToRefresh]: enable or disable Swipe to Refresh
-  ///     iOS WIP
-  /// - [enableNavigationOutsideOfHost]: enable or disable navigation outside of url host
   Future reload(
     String url, {
     Map<String, String> headers,
@@ -131,7 +125,6 @@ class WebViewPlugin {
     bool enableLocalStorage = true,
     bool enableScroll = true,
     bool enableSwipeToRefresh = false,
-    bool enableNavigationOutsideOfHost = false,
   }) {
     final args = _createParams(
       url,
@@ -144,7 +137,6 @@ class WebViewPlugin {
       enableLocalStorage,
       enableScroll,
       enableSwipeToRefresh,
-      enableNavigationOutsideOfHost,
     );
 
     return _channel.invokeMethod('reload', args);
@@ -161,7 +153,6 @@ class WebViewPlugin {
     bool enableLocalStorage,
     bool enableScroll,
     bool enableSwipeToRefresh,
-    bool enableNavigationOutsideOfHost,
   ) {
     final args = <String, dynamic>{
       'url': url,
@@ -173,7 +164,6 @@ class WebViewPlugin {
       'enableScroll': enableScroll ?? true,
       'enableSwipeToRefresh': enableSwipeToRefresh ?? false,
       'headers': headers,
-      'enableNavigationOutsideOfHost': enableNavigationOutsideOfHost ?? false
     };
 
     if (rect != null) {

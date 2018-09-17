@@ -43,9 +43,6 @@ class FlutterPluginWebview(
     private var chromeHandler: WebChromeHandler? = null
     private var webHandler: WebHandler? = null
 
-    private var host: String = ""
-    private var enableNavigationOutsideOfHost: Boolean = false
-
     override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?): Boolean =
             if (webView == null)
                 false
@@ -123,7 +120,6 @@ class FlutterPluginWebview(
     }
 
     private fun launch(call: MethodCall, result: Result, initIfClosed: Boolean = true) {
-//        val visible: Boolean = call.argument("visible")
         val url: Uri = Uri.parse(call.argument("url"))
         val userAgent: String? = call.argument("userAgent")
         val enableJavascript: Boolean = call.argument("enableJavaScript")
@@ -133,9 +129,6 @@ class FlutterPluginWebview(
         val headers: Map<String, String>? = call.argument("headers")
         val enableScroll: Boolean = call.argument("enableScroll")
         val enableSwipeToRefresh: Boolean = call.argument("enableSwipeToRefresh")
-        enableNavigationOutsideOfHost = call.argument("enableNavigationOutsideOfHost")
-
-        host = url.host
 
         if (initIfClosed) {
             initWebView(
@@ -178,9 +171,6 @@ class FlutterPluginWebview(
     private fun openUrl(call: MethodCall, result: Result) {
         val url: Uri = Uri.parse(call.argument("url"))
         val headers: Map<String, String>? = call.argument("headers")
-        enableNavigationOutsideOfHost = call.argument("enableNavigationOutsideOfHost")
-
-        host = url.host
 
         if (headers?.isNotEmpty() == true) {
             webView?.loadUrl("$url", headers)
@@ -366,6 +356,4 @@ class FlutterPluginWebview(
         data["statusCode"] = errorResponse?.statusCode ?: -1
         onStateChange(channel, data)
     }
-
-    override fun shouldOverrideUrlLoading(view: WebView?, url: Uri?): Boolean = enableNavigationOutsideOfHost || url?.host == host
 }

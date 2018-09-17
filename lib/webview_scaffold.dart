@@ -18,11 +18,10 @@ class WebViewScaffold extends StatefulWidget {
   final String userAgent;
   final bool enableLocalStorage;
   final bool enableScroll;
-  final bool swipeToRefresh;
+  final bool enableSwipeToRefresh;
   final Map<String, String> headers;
   final bool refreshOnResume;
   final bool exitAppOnClose;
-  final bool enableNavigationOutsideOfHost;
 
   const WebViewScaffold({
     Key key,
@@ -36,11 +35,10 @@ class WebViewScaffold extends StatefulWidget {
     this.userAgent,
     this.enableLocalStorage = true,
     this.enableScroll = true,
-    this.swipeToRefresh = true,
+    this.enableSwipeToRefresh = true,
     this.headers,
     this.refreshOnResume = true,
     this.exitAppOnClose = false,
-    this.enableNavigationOutsideOfHost = false,
   }) : super(key: key);
 
   @override
@@ -99,8 +97,7 @@ class WebViewScaffoldState extends State<WebViewScaffold>
         rect: _rect,
         enableLocalStorage: widget.enableLocalStorage,
         enableScroll: widget.enableScroll,
-        enableSwipeToRefresh: widget.swipeToRefresh,
-        enableNavigationOutsideOfHost: widget.enableNavigationOutsideOfHost,
+        enableSwipeToRefresh: widget.enableSwipeToRefresh,
       );
     } else {
       final rect = _buildRect(context: context);
