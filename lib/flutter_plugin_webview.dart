@@ -65,7 +65,6 @@ class WebViewPlugin {
   /// Start the WebView with [url]
   /// - [headers] specify additional HTTP headers
   /// - [enableJavaScript] enable/disable javaScript inside WebView
-  ///     iOS WebView: Not implemented yet
   /// - [clearCache] clear WebView cache
   /// - [clearCookies] clear WebView cookies
   /// - [rect]: show in rect, fullscreen if null
@@ -105,7 +104,6 @@ class WebViewPlugin {
   /// Reload the WebView with [url] and new parameters
   /// - [headers] specify additional HTTP headers
   /// - [enableJavaScript] enable/disable javaScript inside WebView
-  ///     iOS WebView: Not implemented yet
   /// - [clearCache] clear WebView cache
   /// - [clearCookies] clear WebView cookies
   /// - [rect]: show in rect, fullscreen if null
