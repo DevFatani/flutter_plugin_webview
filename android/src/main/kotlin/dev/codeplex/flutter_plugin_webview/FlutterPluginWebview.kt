@@ -12,7 +12,6 @@ import android.view.KeyEvent
 import android.view.ViewGroup
 import android.webkit.*
 import dev.codeplex.flutter_plugin_webview.WebviewState.Companion.onStateChange
-import dev.codeplex.flutter_plugin_webview.WebviewState.Companion.onStateIdle
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.Result
@@ -171,8 +170,6 @@ class FlutterPluginWebview(
             } else {
                 loadUrl("$url")
             }
-
-            onStateIdle(channel)
         }
 
         result.success(webView != null)

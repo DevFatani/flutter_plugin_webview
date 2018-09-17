@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/widgets.dart';
 
 abstract class WebViewEvent {}
@@ -9,16 +7,16 @@ abstract class Url {
   String _url;
 }
 
-class WebViewEventUrlChange extends WebViewEvent with Url {
-  WebViewEventUrlChange(String url) : super() {
-    this._url = url;
-  }
+//class WebViewEventUrlChange extends WebViewEvent with Url {
+//  WebViewEventUrlChange(String url) : super() {
+//    this._url = url;
+//  }
+//
+//  @override
+//  String toString() => 'WebViewEventUrlChange';
+//}
 
-  @override
-  String toString() => 'WebViewEventUrlChange';
-}
-
-class WebViewEventLoadStarted extends WebViewEvent with Url {
+class WebViewEventLoadStarted extends WebViewEvent {
 //  WebViewEventLoadStarted(String url) : super() {
 //    this._url = url;
 //  }
@@ -27,7 +25,7 @@ class WebViewEventLoadStarted extends WebViewEvent with Url {
   String toString() => 'WebViewEventLoadStarted';
 }
 
-class WebViewEventLoadFinished extends WebViewEvent with Url {
+class WebViewEventLoadFinished extends WebViewEvent {
 //  WebViewEventLoadFinished(String url) : super() {
 //    this._url = url;
 //  }
@@ -36,12 +34,10 @@ class WebViewEventLoadFinished extends WebViewEvent with Url {
   String toString() => 'WebViewEventLoadFinished';
 }
 
-class WebViewEventError extends WebViewEvent with Url {
+class WebViewEventError extends WebViewEvent {
   final int statusCode;
 
-  WebViewEventError(this.statusCode) : super() {
-    this._url = url;
-  }
+  WebViewEventError(this.statusCode) : super();
 
   @override
   String toString() => 'WebViewEventError, statusCode: $statusCode';
@@ -89,10 +85,10 @@ class WebViewState {
     );
   }
 
-  static Rect _getRect(Map<String, double> rect) => (rect == null
-      ? null
-      : Rect.fromLTWH(
-          rect['left'], rect['top'], rect['width'], rect['height']));
+//  static Rect _getRect(Map<String, double> rect) => (rect == null
+//      ? null
+//      : Rect.fromLTWH(
+//          rect['left'], rect['top'], rect['width'], rect['height']));
 
   static WebViewEvent _getEvent(String event, Map<String, dynamic> data) {
     switch (event) {

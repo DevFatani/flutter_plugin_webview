@@ -4,7 +4,6 @@ import WebKit
 public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDelegate  {
     
     public static func register(with registrar: FlutterPluginRegistrar) {
-        print("registering")
         let channel = FlutterMethodChannel(name: "flutter_plugin_webview", binaryMessenger: registrar.messenger())
         let viewController = registrar.messenger() as! UIViewController
         let instance = SwiftFlutterPluginWebview(viewController, channel)
@@ -99,8 +98,8 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
             
             request.allHTTPHeaderFields = headers
             
-            webView?.load(request)
             webView?.allowsBackForwardNavigationGestures = true
+            webView?.load(request)
         }
     }
     
@@ -108,7 +107,7 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         if webView == nil {
             webView = WKWebView(frame: rect,configuration: configuration)
             webView!.navigationDelegate = self
-            webView!.addObserver(self, forKeyPath: #keyPath(WKWebView.url), options: .new, context: nil)
+            //            webView!.addObserver(self, forKeyPath: #keyPath(WKWebView.url), options: .new, context: nil)
             if enableSwipeToRefresh {
                 webView?.scrollView.bounces = true
                 swipeRefresh = UIRefreshControl()
@@ -119,11 +118,11 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
         }
     }
     
-    public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if keyPath == #keyPath(WKWebView.url) {
-            WebviewState.onStateChange(channel ,["event": "urlChange", "url": webView?.url?.absoluteString ?? ""])
-        }
-    }
+    //    public override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+    //        if keyPath == #keyPath(WKWebView.url) {
+    //            WebviewState.onStateChange(channel ,["event": "urlChange", "url": webView?.url?.absoluteString ?? ""])
+    //        }
+    //    }
     
     @objc private func swipeRefreshAction() {
         refresh()

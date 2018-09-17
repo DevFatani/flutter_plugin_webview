@@ -12,11 +12,5 @@ class WebviewState {
                 channel.invokeMethod("onStateChange", data)
             }
         }
-
-        fun onStateIdle(channel: MethodChannel) {
-            val data = HashMap<String, Any>()
-            data["event"] = "idle"
-            channel.invokeMethod("onStateChange", data)
-        }
     }
 }
