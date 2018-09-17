@@ -71,7 +71,7 @@ class WebViewPlugin {
   /// - [userAgent]: set the User-Agent of WebView
   /// - [enableLocalStorage] enable/disable localStorage API on WebView
   ///     for iOS supports iOS <= 9.0, for iOS < 9.0 enabled by default
-  /// - [enableScroll]: enable/disable enableScroll
+  /// - [enableScroll]: enable/disable scroll
   /// - [enableSwipeToRefresh]: enable/disable Swipe to Refresh
   Future launch(
     String url, {
@@ -110,7 +110,7 @@ class WebViewPlugin {
   /// - [userAgent]: set the User-Agent of WebView
   /// - [enableLocalStorage] enable localStorage API on WebView
   ///     for iOS supports iOS <= 9.0, for iOS < 9.0 enabled by default
-  /// - [enableScroll]: enable or disable enableScroll
+  /// - [enableScroll]: enable or disable scroll
   /// - [enableSwipeToRefresh]: enable or disable Swipe to Refresh
   Future reload(
     String url, {
