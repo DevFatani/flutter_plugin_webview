@@ -31,11 +31,6 @@ open class WebHandler(private val callback: Callback) : WebViewClient() {
         callback.onReceivedHttpError(view, request, errorResponse)
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    override fun shouldOverrideUrlLoading(view: WebView?, request: WebResourceRequest?): Boolean {
-        return callback.shouldOverrideUrlLoading(view, request?.url)
-    }
-
     interface Callback {
         fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?)
 
