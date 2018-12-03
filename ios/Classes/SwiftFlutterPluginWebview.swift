@@ -5,9 +5,15 @@ public class SwiftFlutterPluginWebview: NSObject, FlutterPlugin, WKNavigationDel
     
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "flutter_plugin_webview", binaryMessenger: registrar.messenger())
-        let viewController = registrar.messenger() as! UIViewController
-        let instance = SwiftFlutterPluginWebview(viewController, channel)
-        registrar.addMethodCallDelegate(instance, channel: channel)
+//           BUG ...
+//         let viewController = registrar.messenger() as! UIViewController
+//         let instance = SwiftFlutterPluginWebview(viewController, channel)
+//         registrar.addMethodCallDelegate(instance, channel: channel)
+        
+         if let viewController = UIApplication.shared.delegate?.window??.rootViewController {
+            let instance = SwiftFlutterPluginWebview(viewController, channel)
+            registrar.addMethodCallDelegate(instance, channel: channel)
+        }
     }
     
     private final var viewController: UIViewController
